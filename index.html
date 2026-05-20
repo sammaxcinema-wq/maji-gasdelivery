@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
+    <title>Maji & Gas Delivery | NyumbaniFresh – Premium Utility Delivery</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * { font-family: 'Inter', system-ui, -apple-system, sans-serif; }
+        body { background: #EFF3F8; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 24px; }
+        /* Hide scrollbar for category pills */
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        /* Custom range thumb */
+        input[type="range"] { -webkit-appearance: none; background: #E2E8F0; height: 4px; border-radius: 10px; }
+        input[type="range"]:focus { outline: none; }
+        input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 20px; height: 20px; border-radius: 50%; background: #0284C7; cursor: pointer; box-shadow: 0 2px 8px rgba(2,132,199,0.3); border: 2px solid white; }
+        /* Card micro-interactions */
+        .product-card { transition: transform 0.2s, box-shadow 0.2s; }
+        .product-card:hover { transform: translateY(-4px); box-shadow: 0 20px 30px -12px rgba(2,132,199,0.15); }
+    </style>
+</head>
+<body>
+
+<!-- ==================== SCREEN 1: MARKETPLACE DASHBOARD ==================== -->
+<div class="w-[390px] h-[844px] bg-white rounded-[44px] relative flex flex-col overflow-hidden shadow-2xl border border-white/30">
+    <!-- Status bar spacer -->
+    <div class="h-10 w-full"></div>
+
+    <!-- Brand Header -->
+    <div class="px-6 pt-2">
+        <h1 class="text-3xl font-extrabold tracking-tight text-slate-900">Maji & Gas</h1>
+        <p class="text-sm font-medium text-slate-400 mt-1">NyumbaniFresh • Fast delivery to your doorstep</p>
+    </div>
+
+    <!-- Search + Filter -->
+    <div class="px-6 mt-6 flex gap-3">
+        <div class="relative flex-1">
+            <svg class="absolute left-4 top-3.5 h-5 w-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+            <input type="text" id="searchInput" placeholder="Search water refill or gas cylinder..." class="w-full bg-slate-50 text-sm py-3.5 pl-12 pr-4 rounded-2xl focus:outline-none focus:ring-2 focus:ring-cyan-500/20 text-slate-700 placeholder-slate-400 font-medium">
+        </div>
+        <button id="filterBtn" class="bg-cyan-600 hover:bg-cyan-700 p-3.5 rounded-2xl text-white shadow-md shadow-cyan-500/20 transition-all">
+            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
+            </svg>
+        </button>
+    </div>
+
+    <!-- Horizontal Category Pills -->
+    <div class="flex gap-3 px-6 mt-6 overflow-x-auto no-scrollbar pb-2" id="categoryContainer">
+        <button data-cat="all" class="cat-pill bg-slate-900 text-white text-xs font-bold px-5 py-2.5 rounded-full whitespace-nowrap shadow-sm">All Items</button>
+        <button data-cat="water" class="cat-pill bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs font-semibold px-5 py-2.5 rounded-full transition-all">Water Refills</button>
+        <button data-cat="gas" class="cat-pill bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs font-semibold px-5 py-2.5 rounded-full transition-all">LPG Gas</button>
+        <button data-cat="accessories" class="cat-pill bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs font-semibold px-5 py-2.5 rounded-full transition-all">Accessories</button>
+    </div>
+
+    <!-- Product Grid (2 columns) -->
+    <div class="flex-1 overflow-y-auto px-6 grid grid-cols-2 gap-5 mt-5 pb-32 no-scrollbar" id="productGrid"></div>
+
+    <!-- Premium Bottom Navigation with Center FAB -->
+    <div class="absolute bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md h-24 shadow-[0_-10px_35px_rgba(15,23,42,0.06)] flex items-center justify-between px-8 border-t border-slate-100 rounded-t-3xl">
+        <button class="text-cyan-600 flex flex-col items-center gap-0.5">
+            <svg class="h-5 w-5 fill-current" viewBox="0 0 24 24"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+            <span class="text-[10px] font-bold">Home</span>
+        </button>
+        <button class="text-slate-400 hover:text-slate-600 flex flex-col items-center gap-0.5">
+            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+            <span class="text-[10px]">Profile</span>
+        </button>
+        
+        <!-- Floating Center Action Button -->
+        <div class="absolute -top-7 left-1/2 transform -translate-x-1/2">
+            <button id="fabCenter" class="bg-cyan-600 hover:bg-cyan-700 h-14 w-14 rounded-full flex items-center justify-center text-white text-2xl font-bold shadow-xl shadow-cyan-500/40 border-4 border-white transition-all active:scale-95">
+                +
+            </button>
+        </div>
+        
+        <button class="text-slate-400 hover:text-slate-600 flex flex-col items-center gap-0.5 ml-8">
+            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9h3m-3 4h3m-6-4h.01M9 16h.01"/></svg>
+            <span class="text-[10px]">Orders</span>
+        </button>
+        <button class="text-slate-400 hover:text-slate-600 flex flex-col items-center gap-0.5">
+            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
+            <span class="text-[10px]">Saved</span>
+        </button>
+    </div>
+</div>
+
+
+<!-- ==================== SCREEN 2: PRODUCT DETAIL & CHECKOUT CONFIGURATOR ==================== -->
+<div class="w-[390px] h-[844px] bg-white rounded-[44px] relative flex flex-col overflow-hidden shadow-2xl border border-white/30 ml-6">
+    <!-- Status spacer -->
+    <div class="h-10 w-full"></div>
+
+    <!-- Header: back arrow + search icon -->
+    <div class="px-6 pt-2 flex items-center justify-between">
+        <button id="backFromDetailBtn" class="bg-slate-100 hover:bg-slate-200 p-3 rounded-xl text-slate-700 transition-all active:scale-95">
+            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"></path></svg>
+        </button>
+        <button class="bg-slate-100 hover:bg-slate-200 p-3 rounded-xl text-slate-700 transition-all">
+            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+        </button>
+    </div>
+
+    <!-- Hero Product Visual Area -->
+    <div class="w-full flex justify-center py-6" id="heroVisualContainer">
+        <!-- Dynamic hero asset will be injected via JS -->
+    </div>
+
+    <!-- Scrollable Product Meta & Config -->
+    <div class="flex-1 overflow-y-auto px-6 pb-6">
+        <h2 id="detailTitle" class="text-2xl font-extrabold text-slate-900 tracking-tight">13kg Gas Cylinder Refill</h2>
+        
+        <!-- Rating & Badges Row -->
+        <div class="flex items-center gap-3 mt-3 flex-wrap">
+            <div class="flex items-center gap-1 bg-slate-100 px-3 py-1.5 rounded-full text-xs font-semibold">
+                <span class="text-amber-400 text-sm">★</span> <span id="detailRating">4.8</span>
+            </div>
+            <div class="bg-emerald-50 text-emerald-700 px-3 py-1.5 rounded-full text-[11px] font-bold flex items-center gap-1">
+                <span class="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse"></span> M-PESA READY
+            </div>
+            <div class="bg-cyan-50 text-cyan-700 px-3 py-1.5 rounded-full text-[11px] font-bold flex items-center gap-1">
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                15-30 mins delivery
+            </div>
+        </div>
+
+        <!-- Description -->
+        <p id="detailDesc" class="text-slate-500 text-sm leading-relaxed mt-4 font-medium">
+            Premium standard LPG gas, refined for maximum efficiency. Double anti-leak valve, compliant with KEBS safety standards.
+        </p>
+
+        <!-- Custom Modifier Slider (Gas Valve Type / Purity Level) with step stops -->
+        <div class="mt-6 bg-slate-50/80 p-4 rounded-2xl">
+            <div class="flex justify-between items-center mb-2">
+                <span class="text-sm font-extrabold text-slate-800">Valve / System Type</span>
+                <span id="sliderStepLabel" class="text-xs font-bold text-cyan-600 bg-cyan-50 px-3 py-1 rounded-full">Standard Click-on</span>
+            </div>
+            <input type="range" id="modifierSlider" min="0" max="2" value="0" step="1" class="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-cyan-600">
+            <div class="flex justify-between text-[11px] font-bold text-slate-400 mt-2 px-1">
+                <span>Standard</span>
+                <span>Threaded Premium</span>
+                <span>Industrial Duty</span>
+            </div>
+        </div>
+
+        <!-- Quantity Stepper + Price Bar -->
+        <div class="flex items-center justify-between mt-6 pt-2">
+            <div>
+                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Total Price</span>
+                <div class="text-2xl font-black text-slate-900" id="totalPriceDisplay">KSh 1,540</div>
+            </div>
+            <div class="flex items-center bg-slate-50 border border-slate-100 rounded-2xl p-1.5 gap-4 shadow-sm">
+                <button id="decrementQty" class="w-9 h-9 rounded-xl bg-white flex items-center justify-center font-bold text-slate-600 shadow-sm active:scale-95 transition-all">-</button>
+                <span id="quantityValue" class="font-extrabold text-base text-slate-800 w-5 text-center">1</span>
+                <button id="incrementQty" class="w-9 h-9 rounded-xl bg-cyan-600 flex items-center justify-center font-bold text-white shadow-md shadow-cyan-500/20 active:scale-95 transition-all">+</button>
+            </div>
+        </div>
+
+        <!-- Primary CTA Button -->
+        <div class="mt-6 pb-6">
+            <button id="mpesaCheckoutBtn" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-extrabold py-4 rounded-2xl transition-all shadow-xl shadow-slate-900/20 text-sm flex items-center justify-center gap-2">
+                <span>ORDER VIA M-PESA</span>
+                <svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+            </button>
+            <p class="text-center text-[11px] text-slate-400 font-medium mt-3">Free delivery on orders above KSh 2,000</p>
+        </div>
+    </div>
+</div>
+
+<!-- Toast Notification -->
+<div id="toastMsg" class="fixed bottom-8 left-1/2 -translate-x-1/2 bg-slate-900 text-white text-sm font-semibold px-5 py-3 rounded-full shadow-2xl flex items-center gap-2 opacity-0 transition-all duration-300 pointer-events-none z-50 whitespace-nowrap">
+    <span class="w-2 h-2 bg-emerald-400 rounded-full animate-pulse"></span>
+    <span id="toastText">Action complete</span>
+</div>
+
+<script>
+    // --------------------------------------------------------------
+    // PRODUCT DATABASE (Matching Hydro-Aero aesthetics)
+    // --------------------------------------------------------------
+    const products = [
+        { id: "p1", name: "20L Pure Water Refill", category: "water", basePrice: 350, rating: 4.9, desc: "Ultra-pure mineral water refill. Double protective caps, BPA-free container.", assetType: "water", color: "bg-cyan-500" },
+        { id: "p2", name: "6kg Gas Cylinder Complete", category: "gas", basePrice: 1250, rating: 4.7, desc: "Portable domestic LPG canister. Certified safety valve, ideal for home use.", assetType: "gas", color: "bg-emerald-500", sizeLabel: "6KG" },
+        { id: "p3", name: "13kg Gas Cylinder Refill", category: "gas", basePrice: 1540, rating: 4.8, desc: "Standard household LPG refill. High efficiency flame output, KEBS approved.", assetType: "gas", color: "bg-cyan-600", sizeLabel: "13KG" },
+        { id: "p4", name: "Brass Gas Regulator", category: "accessories", basePrice: 850, rating: 4.5, desc: "Industrial-grade auto-shutoff regulator. Prevents leaks and ensures stability.", assetType: "accessory", color: "bg-amber-600" }
+    ];
+
+    // Modifier mapping per category (step 0,1,2)
+    const modifierMap = {
+        water: [
+            { label: "Standard Cap Setup", premium: 0 },
+            { label: "Silicone Pump Valve", premium: 180 },
+            { label: "Sanitized Spigot Kit", premium: 400 }
+        ],
+        gas: [
+            { label: "Standard Click-on (20mm)", premium: 0 },
+            { label: "Threaded Safety Joint", premium: 250 },
+            { label: "Industrial Dual-Gauge", premium: 650 }
+        ],
+        accessories: [
+            { label: "Base Clamp Fittings", premium: 0 },
+            { label: "High-Pressure Hose Flex", premium: 300 },
+            { label: "Full Kit (Hose + Clips)", premium: 550 }
+        ]
+    };
+
+    // App state
+    let currentCategory = "all";
+    let currentSearch = "";
+    let selectedProductId = "p3";  // default 13kg gas
+    let currentQuantity = 1;
+    let currentModifierStep = 0;
+    let favorites = new Set(["p2"]);  // 6kg gas pre-liked
+
+    // DOM Elements
+    const productGrid = document.getElementById("productGrid");
+    const searchInput = document.getElementById("searchInput");
+    const categoryBtns = document.querySelectorAll(".cat-pill");
+    const detailTitle = document.getElementById("detailTitle");
+    const detailRating = document.getElementById("detailRating");
+    const detailDesc = document.getElementById("detailDesc");
+    const heroContainer = document.getElementById("heroVisualContainer");
+    const modifierSlider = document.getElementById("modifierSlider");
+    const sliderStepLabel = document.getElementById("sliderStepLabel");
+    const totalPriceDisplay = document.getElementById("totalPriceDisplay");
+    const quantitySpan = document.getElementById("quantityValue");
+    const decrementBtn = document.getElementById("decrementQty");
+    const incrementBtn = document.getElementById("incrementQty");
+    const mpesaBtn = document.getElementById("mpesaCheckoutBtn");
+    const backBtn = document.getElementById("backFromDetailBtn");
+    const fab = document.getElementById("fabCenter");
+    const toastEl = document.getElementById("toastMsg");
+    const toastTextSpan = document.getElementById("toastText");
+
+    // Helper: Toast
+    function showToast(message, isError = false) {
+        toastTextSpan.innerText = message;
+        toastEl.classList.remove("opacity-0");
+        toastEl.classList.add("opacity-100");
+        setTimeout(() => {
+            toastEl.classList.remove("opacity-100");
+            toastEl.classList.add("opacity-0");
+        }, 3000);
+    }
+
+    // Render hero asset based on product type
+    function renderHeroAsset(product) {
+        if (product.assetType === "water") {
+            heroContainer.innerHTML = `
+                <div class="w-32 h-44 ${product.color} rounded-[32px] relative flex flex-col items-center justify-center shadow-2xl shadow-cyan-500/10 border-4 border-white">
+                    <div class="w-16 h-4 bg-cyan-200 absolute -top-3 rounded-md border-2 border-white shadow"></div>
+                    <span class="text-white font-extrabold tracking-wider text-sm opacity-90">20 LITRES</span>
+                </div>`;
+        } else if (product.assetType === "gas") {
+            const displaySize = product.sizeLabel || (product.id === "p2" ? "6KG" : "13KG");
+            heroContainer.innerHTML = `
+                <div class="w-40 h-44 ${product.color} rounded-[36px] relative flex flex-col items-center justify-start shadow-2xl shadow-emerald-900/10 transform scale-105">
+                    <div class="w-28 h-8 border-4 border-black/10 bg-white/20 rounded-full absolute -top-3 shadow-sm flex items-center justify-center"></div>
+                    <div class="w-6 h-3 bg-slate-800 absolute -top-1.5 rounded-sm"></div>
+                    <div class="mt-16 text-center">
+                        <span class="text-white font-extrabold tracking-widest text-lg block leading-none">${displaySize}</span>
+                        <span class="text-white/60 text-[9px] uppercase font-bold tracking-widest block mt-1">LPG REFINE</span>
+                    </div>
+                </div>`;
+        } else {
+            heroContainer.innerHTML = `
+                <div class="w-32 h-32 ${product.color} rounded-full relative flex items-center justify-center border-8 border-white shadow-2xl">
+                    <svg class="w-12 h-12 text-white animate-pulse" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path></svg>
+                </div>`;
+        }
+    }
+
+    // Update product detail panel UI
+    function updateDetailPanel(product) {
+        detailTitle.innerText = product.name;
+        detailRating.innerText = product.rating.toFixed(1);
+        detailDesc.innerText = product.desc;
+        renderHeroAsset(product);
+
+        // reset modifier step & slider based on category
+        const cat = product.category;
+        const modList = modifierMap[cat] || modifierMap.accessories;
+        currentModifierStep = 0;
+        modifierSlider.value = 0;
+        sliderStepLabel.innerText = modList[0].label;
+        
+        // reset quantity
+        currentQuantity = 1;
+        quantitySpan.innerText = currentQuantity;
+        computeTotalPrice();
+    }
+
+    // Compute total price based on selected product, modifier, quantity
+    function computeTotalPrice() {
+        const product = products.find(p => p.id === selectedProductId);
+        if (!product) return;
+        const modList = modifierMap[product.category] || modifierMap.accessories;
+        const modifierCost = modList[currentModifierStep]?.premium || 0;
+        const total = (product.basePrice + modifierCost) * currentQuantity;
+        totalPriceDisplay.innerText = `KSh ${total.toLocaleString()}`;
+    }
+
+    // Sync quantity display and recompute
+    function syncQuantity() {
+        quantitySpan.innerText = currentQuantity;
+        computeTotalPrice();
+    }
+
+    // Render product grid with current filters + favorites
+    function renderProductGrid() {
+        let filtered = products.filter(p => {
+            const matchCat = currentCategory === "all" || p.category === currentCategory;
+            const matchSearch = p.name.toLowerCase().includes(currentSearch.toLowerCase());
+            return matchCat && matchSearch;
+        });
+        if (filtered.length === 0) {
+            productGrid.innerHTML = `<div class="col-span-2 text-center py-12 text-xs font-semibold text-slate-400">No premium items match your criteria.</div>`;
+            return;
+        }
+        productGrid.innerHTML = "";
+        filtered.forEach(product => {
+            const isFav = favorites.has(product.id);
+            const card = document.createElement("div");
+            card.className = `bg-white border border-slate-100 rounded-[28px] p-3 relative product-card cursor-pointer ${selectedProductId === product.id ? 'ring-2 ring-cyan-500' : ''}`;
+            card.setAttribute("data-id", product.id);
+            
+            let assetPreview = "";
+            if (product.assetType === "water") {
+                assetPreview = `<div class="w-10 h-16 ${product.color} rounded-lg relative flex flex-col items-center justify-center shadow-inner"><div class="w-6 h-2 bg-cyan-200 absolute -top-1 rounded-sm"></div></div>`;
+            } else if (product.assetType === "gas") {
+                assetPreview = `<div class="w-14 h-16 ${product.color} rounded-2xl relative flex flex-col items-center justify-start"><div class="w-10 h-3 bg-white/30 rounded-full absolute -top-1.5"></div><span class="text-white text-[9px] font-bold mt-6">${product.sizeLabel || (product.id === "p2" ? "6KG" : "13KG")}</span></div>`;
+            } else {
+                assetPreview = `<div class="w-12 h-12 ${product.color} rounded-full flex items-center justify-center border-2 border-white"><svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/></svg></div>`;
+            }
+            
+            card.innerHTML = `
+                <button class="fav-btn absolute top-3 right-3 z-10 ${isFav ? 'text-rose-500' : 'text-slate-300 hover:text-rose-400'} transition-colors" data-favid="${product.id}">
+                    <svg class="h-5 w-5 fill-current" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+                </button>
+                <div class="h-28 w-full flex items-center justify-center bg-slate-50/60 rounded-2xl mb-3">
+                    ${assetPreview}
+                </div>
+                <div>
+                    <h3 class="text-xs font-bold text-slate-800">${product.name}</h3>
+                    <div class="flex items-center justify-between mt-2">
+                        <div class="flex items-center gap-0.5 text-[10px] font-bold text-slate-500">
+                            <span class="text-amber-500 text-xs">★</span> ${product.rating}
+                        </div>
+                        <span class="text-xs font-extrabold text-cyan-600">KSh ${product.basePrice}</span>
+                    </div>
+                    <button class="add-to-cart-btn w-full mt-3 bg-slate-100 hover:bg-cyan-50 text-cyan-700 text-[11px] font-bold py-1.5 rounded-xl flex items-center justify-center gap-1 transition-all" data-id="${product.id}">
+                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/></svg>
+                        Add
+                    </button>
+                </div>
+            `;
+            productGrid.appendChild(card);
+        });
+        
+        // attach favorite toggle events
+        document.querySelectorAll(".fav-btn").forEach(btn => {
+            btn.addEventListener("click", (e) => {
+                e.stopPropagation();
+                const pid = btn.dataset.favid;
+                if (favorites.has(pid)) {
+                    favorites.delete(pid);
+                    showToast("Removed from favorites");
+                } else {
+                    favorites.add(pid);
+                    showToast("Added to favorites");
+                }
+                renderProductGrid(); // re-render to update heart icon
+                // Also update selection border if needed
+            });
+        });
+        
+        // add-to-cart events (discreet add button)
+        document.querySelectorAll(".add-to-cart-btn").forEach(btn => {
+            btn.addEventListener("click", (e) => {
+                e.stopPropagation();
+                const pid = btn.dataset.id;
+                const product = products.find(p => p.id === pid);
+                showToast(`🛒 ${product.name} added to cart`);
+            });
+        });
+        
+        // product card click to select and update detail screen
+        document.querySelectorAll("#productGrid > div").forEach(card => {
+            card.addEventListener("click", (e) => {
+                if (e.target.closest(".fav-btn") || e.target.closest(".add-to-cart-btn")) return;
+                const pid = card.getAttribute("data-id");
+                if (pid) {
+                    selectedProductId = pid;
+                    const product = products.find(p => p.id === pid);
+                    updateDetailPanel(product);
+                    // update selection border style
+                    document.querySelectorAll("#productGrid > div").forEach(c => c.classList.remove("ring-2", "ring-cyan-500"));
+                    card.classList.add("ring-2", "ring-cyan-500");
+                }
+            });
+        });
+    }
+
+    // Filter & Search event handlers
+    function applyFilters() {
+        renderProductGrid();
+    }
+    
+    searchInput.addEventListener("input", (e) => {
+        currentSearch = e.target.value;
+        applyFilters();
+    });
+    categoryBtns.forEach(btn => {
+        btn.addEventListener("click", () => {
+            const cat = btn.dataset.cat;
+            currentCategory = cat;
+            categoryBtns.forEach(b => {
+                if (b.dataset.cat === cat) {
+                    b.classList.remove("bg-slate-100", "text-slate-600");
+                    b.classList.add("bg-slate-900", "text-white");
+                } else {
+                    b.classList.remove("bg-slate-900", "text-white");
+                    b.classList.add("bg-slate-100", "text-slate-600");
+                }
+            });
+            applyFilters();
+        });
+    });
+    
+    // Modifier slider listener
+    modifierSlider.addEventListener("input", (e) => {
+        currentModifierStep = parseInt(e.target.value);
+        const product = products.find(p => p.id === selectedProductId);
+        if (product) {
+            const modList = modifierMap[product.category] || modifierMap.accessories;
+            sliderStepLabel.innerText = modList[currentModifierStep]?.label || "Standard";
+            computeTotalPrice();
+        }
+    });
+    
+    // Quantity controls
+    decrementBtn.addEventListener("click", () => {
+        if (currentQuantity > 1) {
+            currentQuantity--;
+            syncQuantity();
+        }
+    });
+    incrementBtn.addEventListener("click", () => {
+        if (currentQuantity < 10) {
+            currentQuantity++;
+            syncQuantity();
+        }
+    });
+    
+    // M-PESA Checkout simulation
+    mpesaBtn.addEventListener("click", () => {
+        const product = products.find(p => p.id === selectedProductId);
+        const total = totalPriceDisplay.innerText;
+        showToast(`STK Push sent! Confirm ${total} via M-PESA PIN`);
+    });
+    
+    // Back button (optional: scrolls to top but mainly provides navigation feedback)
+    backBtn.addEventListener("click", () => {
+        showToast("Back to marketplace");
+        // In real app would navigate; here just visual feedback
+    });
+    fab.addEventListener("click", () => {
+        showToast("Quick order assistant ready");
+    });
+    
+    // Initialize with default product (13kg gas)
+    function init() {
+        renderProductGrid();
+        const defaultProduct = products.find(p => p.id === selectedProductId);
+        if (defaultProduct) updateDetailPanel(defaultProduct);
+        // highlight default card in grid
+        setTimeout(() => {
+            const defaultCard = document.querySelector(`#productGrid div[data-id="${selectedProductId}"]`);
+            if (defaultCard) defaultCard.classList.add("ring-2", "ring-cyan-500");
+        }, 100);
+    }
+    
+    init();
+</script>
+</body>
+</html>
