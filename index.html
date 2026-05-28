@@ -134,7 +134,6 @@
     <div id="paymentModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 hidden transition-all">
         <div class="bg-white rounded-3xl max-w-md w-full mx-4 p-6 shadow-2xl">
             <div id="paymentStepContainer" class="space-y-5">
-                <!-- Step 1: Phone & summary -->
                 <div id="paymentPhoneStep">
                     <div class="flex justify-between items-center mb-2"><h3 class="text-xl font-bold">M-PESA Payment</h3><i class="fas fa-mobile-alt text-emerald-600 text-2xl"></i></div>
                     <div class="bg-slate-50 p-3 rounded-xl my-3"><div class="flex justify-between text-sm"><span>Order Total:</span><span class="font-bold" id="paymentOrderAmount">KSh 0</span></div></div>
@@ -144,7 +143,6 @@
                     <button id="initiatePaymentBtn" class="w-full bg-emerald-600 text-white py-3 rounded-xl font-bold mt-4">Request STK Push</button>
                     <button id="cancelPaymentBtn" class="w-full text-slate-500 text-sm mt-2">Cancel</button>
                 </div>
-                <!-- Step 2: Waiting STK -->
                 <div id="paymentWaitingStep" class="hidden text-center space-y-4">
                     <div class="w-20 h-20 bg-emerald-100 rounded-full flex items-center justify-center mx-auto"><i class="fas fa-spinner fa-pulse text-emerald-600 text-3xl"></i></div>
                     <p class="font-bold">STK Push Sent</p>
@@ -152,7 +150,6 @@
                     <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden"><div id="paymentProgressBar" class="bg-emerald-500 h-full w-0 transition-all duration-[30s] linear"></div></div>
                     <div class="flex gap-3"><button id="retryPaymentBtn" class="flex-1 bg-slate-200 py-2 rounded-xl text-sm font-semibold">Cancel & Retry</button></div>
                 </div>
-                <!-- Step 3: Success/Fail -->
                 <div id="paymentResultStep" class="hidden text-center space-y-4"></div>
             </div>
         </div>
@@ -171,7 +168,7 @@
 </div>
 
 <script>
-    // ------------------- EXISTING PRODUCT DATA & CORE LOGIC -------------------
+    // ------------------- PRODUCT DATA & CORE STATE -------------------
     const products = [
         { id: "p1", name: "20L Pure Water Refill", category: "water", basePrice: 350, rating: 4.9, desc: "Ultra-pure mineral water refill. BPA-free container, double sealed cap.", assetType: "water", color: "bg-cyan-500", sizeLabel: "20L" },
         { id: "p2", name: "6kg Gas Cylinder Complete", category: "gas", basePrice: 1250, rating: 4.7, desc: "Portable LPG canister. Certified safety valve.", assetType: "gas", color: "bg-emerald-500", sizeLabel: "6KG" },
@@ -186,10 +183,10 @@
     function saveCart() { localStorage.setItem("maji_cart", JSON.stringify(cart)); updateCartUI(); }
     function showToast(msg, icon="check-circle") { let t=document.getElementById("toast"); document.getElementById("toastMsg").innerHTML=`<i class="fas fa-${icon} text-emerald-400 mr-2"></i> ${msg}`; t.classList.remove("opacity-0","pointer-events-none"); t.classList.add("opacity-100"); setTimeout(()=>{t.classList.remove("opacity-100"); t.classList.add("opacity-0","pointer-events-none");},2500); }
     function updateCartUI() { let cnt=cart.reduce((s,i)=>s+i.quantity,0); document.getElementById("cartCountBadge").innerText=cnt; document.getElementById("mobileCartBadge").innerText=cnt; renderCartDrawer(); }
-    function renderCartDrawer() { let container=document.getElementById("cartItemsList"); if(!container) return; if(cart.length===0){ container.innerHTML='<div class="text-center text-slate-400 py-8">Cart empty</div>'; document.getElementById("cartTotalAmount").innerText="KSh 0"; return; } let total=0; container.innerHTML=cart.map(item=>{ let itemTotal=item.price*item.quantity; total+=itemTotal; return `<div class="flex justify-between items-center border-b pb-3"><div><p class="font-bold text-sm">${item.name}</p><p class="text-[11px] text-slate-500">${item.modifierLabel} • KSh ${item.price}</p></div><div><span class="text-sm font-bold">KSh ${itemTotal}</span><button class="remove-cart-item ml-3 text-rose-500 text-xs bg-rose-50 px-2 py-1 rounded-full" data-id="${item.id}" data-step="${item.modifierStep}"><i class="fas fa-trash-alt"></i></button></div></div>`; }).join(""); document.getElementById("cartTotalAmount").innerHTML=`KSh ${total.toLocaleString()}`; document.querySelectorAll(".remove-cart-item").forEach(btn=>{ btn.addEventListener("click",(e)=>{ let id=btn.dataset.id,step=parseInt(btn.dataset.step); cart=cart.filter(i=>!(i.id===id && i.modifierStep===step)); saveCart(); updateCartUI(); showToast("Removed","trash-alt"); }); }); }
+    function renderCartDrawer() { let container=document.getElementById("cartItemsList"); if(!container) return; if(cart.length===0){ container.innerHTML='<div class="text-center text-slate-400 py-8">Cart empty</div>'; document.getElementById("cartTotalAmount").innerText="KSh 0"; return; } let total=0; container.innerHTML=cart.map(item=>{ let itemTotal=item.price*item.quantity; total+=itemTotal; return `<div class="flex justify-between items-center border-b pb-3"><div><p class="font-bold text-sm">${escapeHtml(item.name)}</p><p class="text-[11px] text-slate-500">${escapeHtml(item.modifierLabel)} • KSh ${item.price}</p></div><div><span class="text-sm font-bold">KSh ${itemTotal}</span><button class="remove-cart-item ml-3 text-rose-500 text-xs bg-rose-50 px-2 py-1 rounded-full" data-id="${item.id}" data-step="${item.modifierStep}"><i class="fas fa-trash-alt"></i></button></div></div>`; }).join(""); document.getElementById("cartTotalAmount").innerHTML=`KSh ${total.toLocaleString()}`; document.querySelectorAll(".remove-cart-item").forEach(btn=>{ btn.addEventListener("click",(e)=>{ let id=btn.dataset.id,step=parseInt(btn.dataset.step); cart=cart.filter(i=>!(i.id===id && i.modifierStep===step)); saveCart(); updateCartUI(); showToast("Removed","trash-alt"); }); }); }
+    function escapeHtml(str) { return str.replace(/[&<>]/g, function(m){ if(m==='&') return '&amp;'; if(m==='<') return '&lt;'; if(m==='>') return '&gt;'; return m;}); }
     function addToCart(product, modifierStep, quantity) { let modList=modifierMap[product.category]||modifierMap.accessories; let mod=modList[modifierStep]; let unitPrice=product.basePrice+(mod?.premium||0); let existingIndex=cart.findIndex(i=>i.id===product.id && i.modifierStep===modifierStep); if(existingIndex!==-1) cart[existingIndex].quantity+=quantity; else cart.push({ id:product.id, name:product.name, price:unitPrice, quantity:quantity, modifierStep:modifierStep, modifierLabel:mod.label }); saveCart(); updateCartUI(); showToast(`${product.name} added`); }
-    function renderGrid() { let filtered=products.filter(p=>(currentCategory==="all"||p.category===currentCategory) && p.name.toLowerCase().includes(currentSearch.toLowerCase())); let grid=document.getElementById("productGrid"); if(filtered.length===0){ grid.innerHTML=`<div class="col-span-full text-center py-12">No items</div>`; return; } grid.innerHTML=filtered.map(p=>{ let isFav=favorites.has(p.id); let assetHtml=p.assetType==="water"?`<div class="w-12 h-20 ${p.color} rounded-xl relative flex flex-col items-center justify-center shadow-md"><div class="w-8 h-2 bg-cyan-200 absolute -top-1 rounded-full"></div><span class="text-white text-[10px] font-bold mt-6">${p.sizeLabel}</span></div>`:p.assetType==="gas"?`<div class="w-14 h-20 ${p.color} rounded-2xl flex flex-col items-center"><div class="w-10 h-2 bg-white/30 rounded-full absolute -top-1"></div><span class="text-white text-[9px] font-bold mt-12">${p.sizeLabel}</span></div>`:`<div class="w-14 h-14 ${p.color} rounded-full flex items-center justify-center"><i class="fas fa-cog text-white text-xl"></i></div>`; return `<div class="product-card bg-white rounded-2xl border p-3 cursor-pointer ${selectedProductId===p.id?'ring-2 ring-teal-500':''}" data-id="${p.id}"><button class="fav-action float-right text-${isFav?'rose-500':'slate-300'} hover:text-rose-400" data-id="${p.id}"><i class="fas fa-heart text-sm"></i></button><div class="flex justify-center items-center h-28 bg-slate-50 rounded-xl mb-2">${assetHtml}</div><h3 class="font-bold text-sm">${p.name}</h3><div class="flex justify-between mt-2"><span>★ ${p.rating}</span><span class="font-black text-teal-600 text-sm">KSh ${p.basePrice}</span></div><button class="add-grid-cart w-full mt-3 bg-slate-100 hover:bg-teal-50 text-teal-700 text-xs font-bold py-1.5 rounded-xl" data-id="${p.id}"><i class="fas fa-plus mr-1"></i> Add</button></div>`; }).join(""); attachProductEvents(); }
-    function attachProductEvents(){ document.querySelectorAll(".product-card").forEach(c=>c.addEventListener("click",(e)=>{ if(!e.target.closest(".fav-action") && !e.target.closest(".add-grid-cart")){ selectedProductId=c.dataset.id; updateDetailPanel(); renderGrid(); }})); document.querySelectorAll(".fav-action").forEach(b=>b.addEventListener("click",(e)=>{ e.stopPropagation(); let id=b.dataset.id; favorites.has(id)?favorites.delete(id):favorites.add(id); saveFavs(); renderGrid(); showToast(favorites.has(id)?"Saved ❤️":"Removed"); })); document.querySelectorAll(".add-grid-cart").forEach(b=>b.addEventListener("click",(e)=>{ e.stopPropagation(); let prod=products.find(p=>p.id===b.dataset.id); if(prod) addToCart(prod,0,1); })); }
+    function renderGrid() { let filtered=products.filter(p=>(currentCategory==="all"||p.category===currentCategory) && p.name.toLowerCase().includes(currentSearch.toLowerCase())); let grid=document.getElementById("productGrid"); if(filtered.length===0){ grid.innerHTML=`<div class="col-span-full text-center py-12 text-slate-400">No items found</div>`; return; } grid.innerHTML=filtered.map(p=>{ let isFav=favorites.has(p.id); let assetHtml=p.assetType==="water"?`<div class="w-12 h-20 ${p.color} rounded-xl relative flex flex-col items-center justify-center shadow-md"><div class="w-8 h-2 bg-cyan-200 absolute -top-1 rounded-full"></div><span class="text-white text-[10px] font-bold mt-6">${p.sizeLabel}</span></div>`:p.assetType==="gas"?`<div class="w-14 h-20 ${p.color} rounded-2xl flex flex-col items-center"><div class="w-10 h-2 bg-white/30 rounded-full absolute -top-1"></div><span class="text-white text-[9px] font-bold mt-12">${p.sizeLabel}</span></div>`:`<div class="w-14 h-14 ${p.color} rounded-full flex items-center justify-center"><i class="fas fa-cog text-white text-xl"></i></div>`; return `<div class="product-card bg-white rounded-2xl border p-3 cursor-pointer transition-all ${selectedProductId===p.id?'ring-2 ring-teal-500':''}" data-id="${p.id}"><button class="fav-action float-right text-${isFav?'rose-500':'slate-300'} hover:text-rose-400" data-id="${p.id}"><i class="fas fa-heart text-sm"></i></button><div class="flex justify-center items-center h-28 bg-slate-50 rounded-xl mb-2">${assetHtml}</div><h3 class="font-bold text-sm">${escapeHtml(p.name)}</h3><div class="flex justify-between mt-2"><span>★ ${p.rating}</span><span class="font-black text-teal-600 text-sm">KSh ${p.basePrice}</span></div><button class="add-grid-cart w-full mt-3 bg-slate-100 hover:bg-teal-50 text-teal-700 text-xs font-bold py-1.5 rounded-xl" data-id="${p.id}"><i class="fas fa-plus mr-1"></i> Add</button></div>`; }).join(""); }
     function updateDetailPanel(){ let prod=products.find(p=>p.id===selectedProductId); if(!prod)return; document.getElementById("detailTitle").innerText=prod.name; document.getElementById("detailRating").innerText=prod.rating.toFixed(1); document.getElementById("detailDesc").innerText=prod.desc; let hero=document.getElementById("heroVisualContainer"); if(prod.assetType==="water") hero.innerHTML=`<div class="w-32 h-44 ${prod.color} rounded-[36px] flex flex-col items-center justify-center shadow-xl border-4 border-white"><div class="w-12 h-3 bg-cyan-200 absolute -top-2 rounded-full"></div><span class="text-white font-black text-sm">${prod.sizeLabel}</span></div>`; else if(prod.assetType==="gas") hero.innerHTML=`<div class="w-36 h-44 ${prod.color} rounded-[36px] flex flex-col items-center justify-start relative shadow-xl"><div class="w-24 h-8 bg-white/20 rounded-full absolute -top-3"></div><div class="mt-16 text-center"><span class="text-white font-black text-xl">${prod.sizeLabel}</span></div></div>`; else hero.innerHTML=`<div class="w-32 h-32 ${prod.color} rounded-full flex items-center justify-center shadow-2xl border-8 border-white"><i class="fas fa-fire-extinguisher text-white text-4xl"></i></div>`; let modList=modifierMap[prod.category]||modifierMap.accessories; currentModifierStep=0; document.getElementById("modifierSlider").value=0; document.getElementById("sliderStepLabel").innerText=modList[0].label; currentQuantity=1; document.getElementById("quantityValue").innerText=currentQuantity; computeTotalPrice(); }
     function computeTotalPrice(){ let p=products.find(p=>p.id===selectedProductId); if(!p)return; let modCost=(modifierMap[p.category]||modifierMap.accessories)[currentModifierStep]?.premium||0; let total=(p.basePrice+modCost)*currentQuantity; document.getElementById("totalPriceDisplay").innerText=`KSh ${total.toLocaleString()}`; }
 
@@ -200,7 +197,7 @@
     function saveUsers(users){ localStorage.setItem("maji_users", JSON.stringify(users)); }
     function persistSession(user, remember){ let session={ user: user, timestamp: Date.now(), remember: remember }; localStorage.setItem("maji_session", JSON.stringify(session)); currentUser=user; updateAuthUI(); }
     function logout(){ localStorage.removeItem("maji_session"); currentUser=null; updateAuthUI(); showToast("Logged out successfully"); }
-    function updateAuthUI(){ let greetingSpan=document.getElementById("userGreeting"); let dropdown=document.getElementById("dropdownContent"); if(currentUser){ greetingSpan.innerText=currentUser.name.split(' ')[0]; dropdown.innerHTML=`<div class="px-3 py-2 text-sm font-semibold">${currentUser.name}</div><div class="border-t"></div><button id="logoutBtnDropdown" class="w-full text-left px-3 py-2 text-sm text-rose-600 hover:bg-slate-50 rounded-lg"><i class="fas fa-sign-out-alt mr-2"></i>Logout</button><button id="myOrdersDropdownBtn" class="w-full text-left px-3 py-2 text-sm hover:bg-slate-50 rounded-lg"><i class="fas fa-receipt mr-2"></i>My Orders</button>`; document.getElementById("logoutBtnDropdown")?.addEventListener("click",()=>{ logout(); closeDropdown(); }); document.getElementById("myOrdersDropdownBtn")?.addEventListener("click",()=>{ openOrdersModal(); closeDropdown(); }); } else { greetingSpan.innerText="Account"; dropdown.innerHTML=`<button id="loginDropdownBtn" class="w-full text-left px-3 py-2 text-sm font-semibold text-teal-600"><i class="fas fa-sign-in-alt mr-2"></i>Login / Signup</button>`; document.getElementById("loginDropdownBtn")?.addEventListener("click",()=>openAuthModal()); } }
+    function updateAuthUI(){ let greetingSpan=document.getElementById("userGreeting"); let dropdown=document.getElementById("dropdownContent"); if(currentUser){ greetingSpan.innerText=currentUser.name.split(' ')[0]; dropdown.innerHTML=`<div class="px-3 py-2 text-sm font-semibold">${escapeHtml(currentUser.name)}</div><div class="border-t"></div><button id="logoutBtnDropdown" class="w-full text-left px-3 py-2 text-sm text-rose-600 hover:bg-slate-50 rounded-lg"><i class="fas fa-sign-out-alt mr-2"></i>Logout</button><button id="myOrdersDropdownBtn" class="w-full text-left px-3 py-2 text-sm hover:bg-slate-50 rounded-lg"><i class="fas fa-receipt mr-2"></i>My Orders</button>`; document.getElementById("logoutBtnDropdown")?.addEventListener("click",()=>{ logout(); closeDropdown(); }); document.getElementById("myOrdersDropdownBtn")?.addEventListener("click",()=>{ openOrdersModal(); closeDropdown(); }); } else { greetingSpan.innerText="Account"; dropdown.innerHTML=`<button id="loginDropdownBtn" class="w-full text-left px-3 py-2 text-sm font-semibold text-teal-600"><i class="fas fa-sign-in-alt mr-2"></i>Login / Signup</button>`; document.getElementById("loginDropdownBtn")?.addEventListener("click",()=>openAuthModal()); } }
     function closeDropdown(){ document.getElementById("userDropdown").classList.add("hidden"); }
     function openAuthModal(){ document.getElementById("authModal").classList.remove("hidden"); }
     function closeAuthModal(){ document.getElementById("authModal").classList.add("hidden"); }
@@ -234,7 +231,7 @@
                 document.getElementById("paymentCancelFinalBtn")?.addEventListener("click",()=>closePaymentModal());
                 reject("timeout");
             },30000);
-            setTimeout(()=>{  // simulate STK success after 2.5 sec
+            setTimeout(()=>{
                 if(activePaymentTimer){
                     clearTimeout(activePaymentTimer);
                     document.getElementById("paymentWaitingStep").classList.add("hidden");
@@ -249,6 +246,58 @@
     function closePaymentModal(){ let modal=document.getElementById("paymentModal"); if(activePaymentTimer) clearTimeout(activePaymentTimer); modal.classList.add("hidden"); document.getElementById("paymentPhoneStep").classList.remove("hidden"); document.getElementById("paymentWaitingStep").classList.add("hidden"); document.getElementById("paymentResultStep").classList.add("hidden"); }
     function openPaymentModal(amount){ document.getElementById("paymentOrderAmount").innerText=`KSh ${amount.toLocaleString()}`; document.getElementById("mpesaPhoneInput").value= currentUser?.phone || ""; document.getElementById("paymentModal").classList.remove("hidden"); }
     async function checkoutFlow(){ if(cart.length===0){ showToast("Cart is empty","times-circle"); return; } let total=cart.reduce((sum,i)=>sum+(i.price*i.quantity),0); if(!currentUser){ openAuthModal(); showToast("Login or continue as guest to proceed","info-circle"); return; } openPaymentModal(total); document.getElementById("initiatePaymentBtn").onclick=async()=>{ try{ await initiatePaymentFlow(total, async()=>{ let orderId="ORD-"+Date.now(); let order={ orderId, timestamp:Date.now(), amount:total, itemsCount:cart.length, phone:normalizeKenyanPhone(document.getElementById("mpesaPhoneInput").value)||"2547XXXXXX", status:"Paid", items:[...cart] }; saveOrderToUser(order); cart=[]; saveCart(); updateCartUI(); closePaymentModal(); showToast(`Order ${orderId} confirmed! Delivery on its way.`); }); }catch(e){ if(e!=="invalid") showToast("Payment failed","times-circle"); } }; }
+    
+    // ------------------- EVENT DELEGATION (Fixes all non-working buttons) -------------------
+    function bindDelegatedEvents(){
+        // Product grid delegation for dynamic buttons
+        const productGrid = document.getElementById("productGrid");
+        productGrid.addEventListener("click", (e) => {
+            const target = e.target;
+            const favBtn = target.closest(".fav-action");
+            const addBtn = target.closest(".add-grid-cart");
+            const productCard = target.closest(".product-card");
+            if(favBtn){
+                e.stopPropagation();
+                let id = favBtn.dataset.id;
+                if(favorites.has(id)) favorites.delete(id);
+                else favorites.add(id);
+                saveFavs();
+                renderGrid();
+                showToast(favorites.has(id)?"Saved ❤️":"Removed");
+                return;
+            }
+            if(addBtn){
+                e.stopPropagation();
+                let id = addBtn.dataset.id;
+                let prod = products.find(p => p.id === id);
+                if(prod) addToCart(prod, 0, 1);
+                return;
+            }
+            if(productCard && !favBtn && !addBtn){
+                let id = productCard.dataset.id;
+                if(id){
+                    selectedProductId = id;
+                    updateDetailPanel();
+                    renderGrid();
+                }
+            }
+        });
+        // Cart drawer remove buttons (delegation to container)
+        const cartList = document.getElementById("cartItemsList");
+        if(cartList){
+            cartList.addEventListener("click", (e) => {
+                const removeBtn = e.target.closest(".remove-cart-item");
+                if(removeBtn){
+                    let id = removeBtn.dataset.id;
+                    let step = parseInt(removeBtn.dataset.step);
+                    cart = cart.filter(i => !(i.id === id && i.modifierStep === step));
+                    saveCart();
+                    updateCartUI();
+                    showToast("Removed","trash-alt");
+                }
+            });
+        }
+    }
     
     // ------------------- EVENT INIT & LEGACY BINDINGS -------------------
     function bindMainEvents(){
@@ -283,7 +332,7 @@
         document.querySelectorAll(".toggle-pwd").forEach(icon=>{ icon.addEventListener("click",(e)=>{ let input=e.target.closest(".relative")?.querySelector("input"); if(input){ input.type=input.type==="password"?"text":"password"; e.target.classList.toggle("fa-eye-slash"); e.target.classList.toggle("fa-eye"); } }); });
     }
     
-    function init(){ initAuth(); renderGrid(); updateDetailPanel(); updateCartUI(); bindMainEvents(); }
+    function init(){ initAuth(); renderGrid(); updateDetailPanel(); updateCartUI(); bindDelegatedEvents(); bindMainEvents(); }
     init();
 </script>
 </body>
