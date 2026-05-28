@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=yes">
     <title>NyumbaniFresh | Maji & Gas – Fintech Delivery</title>
-    <!-- Tailwind + Font Awesome + Google Fonts -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -43,13 +42,22 @@
             <p class="text-slate-500 text-sm font-medium">NyumbaniFresh • Fast delivery to your doorstep</p>
         </div>
         <div class="flex items-center gap-3">
-            <button id="ordersHistoryBtn" class="bg-white p-2.5 rounded-full shadow-md hover:shadow-lg transition" title="My Orders"><i class="fas fa-receipt text-slate-600 text-xl"></i></button>
+            <button id="favoritesBtn" class="bg-white p-2.5 rounded-full shadow-md hover:shadow-lg transition" title="Favorites">
+                <i class="fas fa-heart text-slate-400 hover:text-rose-500 transition text-xl"></i>
+            </button>
+            <button id="ordersHistoryBtn" class="bg-white p-2.5 rounded-full shadow-md hover:shadow-lg transition" title="My Orders">
+                <i class="fas fa-receipt text-slate-600 text-xl"></i>
+            </button>
             <button id="cartIconBtn" class="relative bg-white p-2.5 rounded-full shadow-md hover:shadow-lg transition-all">
                 <i class="fas fa-shopping-cart text-teal-600 text-xl"></i>
                 <span id="cartCountBadge" class="absolute -top-1 -right-1 bg-rose-500 text-white text-[10px] font-bold rounded-full w-5 h-5 flex items-center justify-center">0</span>
             </button>
             <div class="relative" id="userMenuContainer">
-                <button id="userProfileBtn" class="bg-white p-2.5 rounded-full shadow-md flex items-center gap-2 px-3"><i class="fas fa-user-circle text-slate-600 text-xl"></i> <span id="userGreeting" class="hidden md:inline text-sm font-semibold text-slate-700">Account</span> <i class="fas fa-chevron-down text-xs text-slate-400 hidden md:inline"></i></button>
+                <button id="userProfileBtn" class="bg-white p-2.5 rounded-full shadow-md flex items-center gap-2 px-3">
+                    <i class="fas fa-user-circle text-slate-600 text-xl"></i>
+                    <span id="userGreeting" class="hidden md:inline text-sm font-semibold text-slate-700">Account</span>
+                    <i class="fas fa-chevron-down text-xs text-slate-400 hidden md:inline"></i>
+                </button>
                 <div id="userDropdown" class="absolute right-0 mt-2 w-48 bg-white rounded-2xl shadow-xl border border-slate-100 hidden z-30">
                     <div class="p-2" id="dropdownContent"></div>
                 </div>
@@ -190,7 +198,6 @@
         let total=0; 
         container.innerHTML=cart.map(item=>{ let itemTotal=item.price*item.quantity; total+=itemTotal; return `<div class="flex justify-between items-center border-b pb-3"><div><p class="font-bold text-sm">${escapeHtml(item.name)}</p><p class="text-[11px] text-slate-500">${escapeHtml(item.modifierLabel)} • KSh ${item.price}</p></div><div><span class="text-sm font-bold">KSh ${itemTotal}</span><button class="remove-cart-item ml-3 text-rose-500 text-xs bg-rose-50 px-2 py-1 rounded-full" data-id="${item.id}" data-step="${item.modifierStep}"><i class="fas fa-trash-alt"></i></button></div></div>`; }).join(""); 
         document.getElementById("cartTotalAmount").innerHTML=`KSh ${total.toLocaleString()}`; 
-        // No direct event attachment here - delegation handles removal
     }
     function escapeHtml(str) { return str.replace(/[&<>]/g, function(m){ if(m==='&') return '&amp;'; if(m==='<') return '&lt;'; if(m==='>') return '&gt;'; return m;}); }
     function addToCart(product, modifierStep, quantity) { let modList=modifierMap[product.category]||modifierMap.accessories; let mod=modList[modifierStep]; let unitPrice=product.basePrice+(mod?.premium||0); let existingIndex=cart.findIndex(i=>i.id===product.id && i.modifierStep===modifierStep); if(existingIndex!==-1) cart[existingIndex].quantity+=quantity; else cart.push({ id:product.id, name:product.name, price:unitPrice, quantity:quantity, modifierStep:modifierStep, modifierLabel:mod.label }); saveCart(); updateCartUI(); showToast(`${product.name} added`); }
@@ -198,7 +205,7 @@
     function updateDetailPanel(){ let prod=products.find(p=>p.id===selectedProductId); if(!prod)return; document.getElementById("detailTitle").innerText=prod.name; document.getElementById("detailRating").innerText=prod.rating.toFixed(1); document.getElementById("detailDesc").innerText=prod.desc; let hero=document.getElementById("heroVisualContainer"); if(prod.assetType==="water") hero.innerHTML=`<div class="w-32 h-44 ${prod.color} rounded-[36px] flex flex-col items-center justify-center shadow-xl border-4 border-white"><div class="w-12 h-3 bg-cyan-200 absolute -top-2 rounded-full"></div><span class="text-white font-black text-sm">${prod.sizeLabel}</span></div>`; else if(prod.assetType==="gas") hero.innerHTML=`<div class="w-36 h-44 ${prod.color} rounded-[36px] flex flex-col items-center justify-start relative shadow-xl"><div class="w-24 h-8 bg-white/20 rounded-full absolute -top-3"></div><div class="mt-16 text-center"><span class="text-white font-black text-xl">${prod.sizeLabel}</span></div></div>`; else hero.innerHTML=`<div class="w-32 h-32 ${prod.color} rounded-full flex items-center justify-center shadow-2xl border-8 border-white"><i class="fas fa-fire-extinguisher text-white text-4xl"></i></div>`; let modList=modifierMap[prod.category]||modifierMap.accessories; currentModifierStep=0; document.getElementById("modifierSlider").value=0; document.getElementById("sliderStepLabel").innerText=modList[0].label; currentQuantity=1; document.getElementById("quantityValue").innerText=currentQuantity; computeTotalPrice(); }
     function computeTotalPrice(){ let p=products.find(p=>p.id===selectedProductId); if(!p)return; let modCost=(modifierMap[p.category]||modifierMap.accessories)[currentModifierStep]?.premium||0; let total=(p.basePrice+modCost)*currentQuantity; document.getElementById("totalPriceDisplay").innerText=`KSh ${total.toLocaleString()}`; }
 
-    // ------------------- AUTH MANAGER (Fixed phone normalization for login) -------------------
+    // ------------------- AUTH MANAGER -------------------
     let currentUser = null;
     function normalizeKenyanPhone(phone){ let cleaned=phone.replace(/\s+/g,'').replace(/^\+?254/, ''); if(cleaned.startsWith('0')) cleaned=cleaned.slice(1); if(cleaned.match(/^[17]\d{8}$/)) return '254'+cleaned; return null; }
     function getUsers(){ return JSON.parse(localStorage.getItem("maji_users") || "[]"); }
@@ -215,7 +222,6 @@
         let identifier=document.getElementById("loginEmailPhone").value.trim();
         let pwd=document.getElementById("loginPassword").value;
         let users=getUsers();
-        // Normalize if identifier looks like phone
         let normalizedId = identifier;
         if(identifier.match(/^[0-9+\s]+$/) && identifier.length >= 9){
             let maybePhone = normalizeKenyanPhone(identifier);
@@ -230,7 +236,7 @@
     }
     function initAuth(){ let session=localStorage.getItem("maji_session"); if(session){ let data=JSON.parse(session); let users=getUsers(); let userFound=users.find(u=>u.id===data.user.id); if(userFound) currentUser=userFound; else localStorage.removeItem("maji_session"); } updateAuthUI(); }
     
-    // ------------------- ORDER & PAYMENT (Guest allowed) -------------------
+    // ------------------- ORDER & PAYMENT -------------------
     function saveOrderToUser(order){ if(currentUser){ let users=getUsers(); let userIndex=users.findIndex(u=>u.id===currentUser.id); if(userIndex!==-1){ users[userIndex].orders=users[userIndex].orders||[]; users[userIndex].orders.unshift(order); saveUsers(users); currentUser=users[userIndex]; updateAuthUI(); } } else { let guestOrders=JSON.parse(localStorage.getItem("maji_guest_orders")||"[]"); guestOrders.unshift(order); localStorage.setItem("maji_guest_orders",JSON.stringify(guestOrders)); } }
     function getUserOrders(){ if(currentUser){ let users=getUsers(); let user=users.find(u=>u.id===currentUser.id); return user?.orders||[]; } else { return JSON.parse(localStorage.getItem("maji_guest_orders")||"[]"); } }
     function openOrdersModal(){ let container=document.getElementById("ordersListContainer"); let orders=getUserOrders(); if(orders.length===0){ container.innerHTML='<div class="text-center py-8 text-slate-400">No orders yet</div>'; }else{ container.innerHTML=orders.map(o=>`<div class="border rounded-xl p-4 bg-slate-50"><div class="flex justify-between"><span class="font-bold">#${o.orderId}</span><span class="text-xs bg-emerald-100 px-2 py-1 rounded-full">${o.status}</span></div><div class="text-sm mt-1">${new Date(o.timestamp).toLocaleString()}</div><div class="mt-2 text-sm">Total: <span class="font-bold">KSh ${o.amount.toLocaleString()}</span></div><div class="text-xs text-slate-500">${o.itemsCount} item(s) • Phone: ${o.phone}</div></div>`).join(""); } document.getElementById("ordersModal").classList.remove("hidden"); }
@@ -272,7 +278,6 @@
     async function checkoutFlow(){ 
         if(cart.length===0){ showToast("Cart is empty","times-circle"); return; } 
         let total=cart.reduce((sum,i)=>sum+(i.price*i.quantity),0); 
-        // Guest allowed: no login enforced
         openPaymentModal(total); 
         document.getElementById("initiatePaymentBtn").onclick=async()=>{ 
             try{ await initiatePaymentFlow(total, async()=>{ 
@@ -288,7 +293,7 @@
         }; 
     }
     
-    // ------------------- EVENT DELEGATION (Fixes all dynamic buttons) -------------------
+    // ------------------- EVENT DELEGATION & BINDINGS -------------------
     function bindDelegatedEvents(){
         const productGrid = document.getElementById("productGrid");
         productGrid.addEventListener("click", (e) => {
@@ -315,7 +320,6 @@
         }
     }
     
-    // ------------------- STATIC EVENT BINDINGS -------------------
     function bindMainEvents(){
         document.getElementById("searchInput").addEventListener("input",(e)=>{ currentSearch=e.target.value; renderGrid(); });
         document.querySelectorAll(".cat-btn").forEach(btn=>{ btn.addEventListener("click",()=>{ currentCategory=btn.dataset.cat; document.querySelectorAll(".cat-btn").forEach(b=>b.classList.remove("bg-slate-800","text-white")); btn.classList.add("bg-slate-800","text-white"); renderGrid(); }); });
@@ -329,7 +333,7 @@
         document.getElementById("mobileCartBtn").addEventListener("click",()=>{ document.getElementById("cartDrawer").classList.remove("translate-x-full"); document.getElementById("drawerOverlay").classList.remove("hidden"); });
         document.getElementById("closeCartBtn").addEventListener("click",()=>{ document.getElementById("cartDrawer").classList.add("translate-x-full"); document.getElementById("drawerOverlay").classList.add("hidden"); });
         document.getElementById("drawerOverlay").addEventListener("click",()=>{ document.getElementById("cartDrawer").classList.add("translate-x-full"); document.getElementById("drawerOverlay").classList.add("hidden"); });
-        document.getElementById("favoritesBtn").addEventListener("click",()=>showToast(`❤️ ${favorites.size} favorites`,"heart"));
+        document.getElementById("favoritesBtn").addEventListener("click",()=>showToast(`❤️ ${favorites.size} favorite items`,"heart"));
         document.getElementById("mobileHomeBtn").addEventListener("click",()=>window.scrollTo({top:0,behavior:"smooth"}));
         document.getElementById("filterBtn").addEventListener("click",()=>showToast("Filters: All categories active","info-circle"));
         document.getElementById("ordersHistoryBtn").addEventListener("click",openOrdersModal);
