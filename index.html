@@ -3,13 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=yes">
-    <title>NyumbaniFresh | Maji & Gas – Fintech Delivery</title>
+    <title>NyumbaniFresh | Maji & Gas – Fintech Delivery (Audit-Fixed)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         * { font-family: 'Inter', sans-serif; }
-        body { background: #EFF3F8; padding-bottom: 70px; }
+        body { 
+            background: #EFF3F8; 
+            padding-bottom: calc(70px + env(safe-area-inset-bottom, 0px));
+        }
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
         input[type="range"] { -webkit-appearance: none; background: #E2E8F0; height: 4px; border-radius: 10px; }
@@ -30,6 +33,9 @@
         .payment-step { transition: all 0.2s; }
         input:focus { ring: 2px solid rgba(10,147,150,0.4); }
         .order-card { transition: all 0.2s; }
+        .fixed.bottom-0 {
+            padding-bottom: env(safe-area-inset-bottom, 0px);
+        }
     </style>
 </head>
 <body class="antialiased p-4 md:p-6">
@@ -176,6 +182,16 @@
 </div>
 
 <script>
+    // ------------------- SAFE JSON PARSING -------------------
+    function safeParseJSON(str, fallback = []) {
+        try {
+            return JSON.parse(str);
+        } catch(e) {
+            console.warn("Corrupted localStorage entry", e);
+            return fallback;
+        }
+    }
+
     // ------------------- PRODUCT DATA & CORE STATE -------------------
     const products = [
         { id: "p1", name: "20L Pure Water Refill", category: "water", basePrice: 350, rating: 4.9, desc: "Ultra-pure mineral water refill. BPA-free container, double sealed cap.", assetType: "water", color: "bg-cyan-500", sizeLabel: "20L" },
@@ -185,10 +201,32 @@
     ];
     const modifierMap = { water: [{ label: "Standard Cap", premium: 0 }, { label: "Silicone Pump", premium: 150 }, { label: "Deluxe Spigot", premium: 350 }], gas: [{ label: "Standard Click-on", premium: 0 }, { label: "Threaded Premium", premium: 200 }, { label: "Industrial Dual-Gauge", premium: 450 }], accessories: [{ label: "Basic Fittings", premium: 0 }, { label: "Reinforced Hose", premium: 100 }, { label: "Full Clamp Kit", premium: 250 }] };
     let currentCategory = "all", currentSearch = "", selectedProductId = "p3", currentQuantity = 1, currentModifierStep = 0;
-    let favorites = new Set(JSON.parse(localStorage.getItem("maji_favorites") || "[]"));
-    let cart = JSON.parse(localStorage.getItem("maji_cart") || "[]");
-    function saveFavs() { localStorage.setItem("maji_favorites", JSON.stringify([...favorites])); }
-    function saveCart() { localStorage.setItem("maji_cart", JSON.stringify(cart)); updateCartUI(); }
+    
+    let favorites = new Set();
+    let cart = [];
+    let currentUser = null;
+
+    // Helper: user-specific storage keys
+    function getUserStorageKey() {
+        const id = currentUser?.id || 'guest';
+        return `maji_${id}`;
+    }
+    function loadCartAndFavs() {
+        const key = getUserStorageKey();
+        cart = safeParseJSON(localStorage.getItem(key + '_cart'), []);
+        const favArr = safeParseJSON(localStorage.getItem(key + '_favorites'), []);
+        favorites = new Set(favArr);
+    }
+    function saveCart() {
+        const key = getUserStorageKey();
+        localStorage.setItem(key + '_cart', JSON.stringify(cart));
+        updateCartUI();
+    }
+    function saveFavs() {
+        const key = getUserStorageKey();
+        localStorage.setItem(key + '_favorites', JSON.stringify([...favorites]));
+    }
+
     function showToast(msg, icon="check-circle") { let t=document.getElementById("toast"); document.getElementById("toastMsg").innerHTML=`<i class="fas fa-${icon} text-emerald-400 mr-2"></i> ${msg}`; t.classList.remove("opacity-0","pointer-events-none"); t.classList.add("opacity-100"); setTimeout(()=>{t.classList.remove("opacity-100"); t.classList.add("opacity-0","pointer-events-none");},2500); }
     function updateCartUI() { let cnt=cart.reduce((s,i)=>s+i.quantity,0); document.getElementById("cartCountBadge").innerText=cnt; document.getElementById("mobileCartBadge").innerText=cnt; renderCartDrawer(); }
     function renderCartDrawer() { 
@@ -199,24 +237,37 @@
         container.innerHTML=cart.map(item=>{ let itemTotal=item.price*item.quantity; total+=itemTotal; return `<div class="flex justify-between items-center border-b pb-3"><div><p class="font-bold text-sm">${escapeHtml(item.name)}</p><p class="text-[11px] text-slate-500">${escapeHtml(item.modifierLabel)} • KSh ${item.price}</p></div><div><span class="text-sm font-bold">KSh ${itemTotal}</span><button class="remove-cart-item ml-3 text-rose-500 text-xs bg-rose-50 px-2 py-1 rounded-full" data-id="${item.id}" data-step="${item.modifierStep}"><i class="fas fa-trash-alt"></i></button></div></div>`; }).join(""); 
         document.getElementById("cartTotalAmount").innerHTML=`KSh ${total.toLocaleString()}`; 
     }
-    function escapeHtml(str) { return str.replace(/[&<>]/g, function(m){ if(m==='&') return '&amp;'; if(m==='<') return '&lt;'; if(m==='>') return '&gt;'; return m;}); }
+    function escapeHtml(str) { if(!str) return ''; return str.replace(/[&<>]/g, function(m){ if(m==='&') return '&amp;'; if(m==='<') return '&lt;'; if(m==='>') return '&gt;'; return m;}); }
     function addToCart(product, modifierStep, quantity) { let modList=modifierMap[product.category]||modifierMap.accessories; let mod=modList[modifierStep]; let unitPrice=product.basePrice+(mod?.premium||0); let existingIndex=cart.findIndex(i=>i.id===product.id && i.modifierStep===modifierStep); if(existingIndex!==-1) cart[existingIndex].quantity+=quantity; else cart.push({ id:product.id, name:product.name, price:unitPrice, quantity:quantity, modifierStep:modifierStep, modifierLabel:mod.label }); saveCart(); updateCartUI(); showToast(`${product.name} added`); }
-    function renderGrid() { let filtered=products.filter(p=>(currentCategory==="all"||p.category===currentCategory) && p.name.toLowerCase().includes(currentSearch.toLowerCase())); let grid=document.getElementById("productGrid"); if(filtered.length===0){ grid.innerHTML=`<div class="col-span-full text-center py-12 text-slate-400">No items found</div>`; return; } grid.innerHTML=filtered.map(p=>{ let isFav=favorites.has(p.id); let assetHtml=p.assetType==="water"?`<div class="w-12 h-20 ${p.color} rounded-xl relative flex flex-col items-center justify-center shadow-md"><div class="w-8 h-2 bg-cyan-200 absolute -top-1 rounded-full"></div><span class="text-white text-[10px] font-bold mt-6">${p.sizeLabel}</span></div>`:p.assetType==="gas"?`<div class="w-14 h-20 ${p.color} rounded-2xl flex flex-col items-center"><div class="w-10 h-2 bg-white/30 rounded-full absolute -top-1"></div><span class="text-white text-[9px] font-bold mt-12">${p.sizeLabel}</span></div>`:`<div class="w-14 h-14 ${p.color} rounded-full flex items-center justify-center"><i class="fas fa-cog text-white text-xl"></i></div>`; return `<div class="product-card bg-white rounded-2xl border p-3 cursor-pointer transition-all ${selectedProductId===p.id?'ring-2 ring-teal-500':''}" data-id="${p.id}"><button class="fav-action float-right text-${isFav?'rose-500':'slate-300'} hover:text-rose-400" data-id="${p.id}"><i class="fas fa-heart text-sm"></i></button><div class="flex justify-center items-center h-28 bg-slate-50 rounded-xl mb-2">${assetHtml}</div><h3 class="font-bold text-sm">${escapeHtml(p.name)}</h3><div class="flex justify-between mt-2"><span>★ ${p.rating}</span><span class="font-black text-teal-600 text-sm">KSh ${p.basePrice}</span></div><button class="add-grid-cart w-full mt-3 bg-slate-100 hover:bg-teal-50 text-teal-700 text-xs font-bold py-1.5 rounded-xl" data-id="${p.id}"><i class="fas fa-plus mr-1"></i> Add</button></div>`; }).join(""); }
+    function renderGrid() { let filtered=products.filter(p=>(currentCategory==="all"||p.category===currentCategory) && p.name.toLowerCase().includes(currentSearch.toLowerCase())); let grid=document.getElementById("productGrid"); if(filtered.length===0){ grid.innerHTML=`<div class="col-span-full text-center py-12 text-slate-400">No items found</div>`; return; } grid.innerHTML=filtered.map(p=>{ let isFav=favorites.has(p.id); let assetHtml=p.assetType==="water"?`<div class="w-12 h-20 ${p.color} rounded-xl relative flex flex-col items-center justify-center shadow-md"><div class="w-8 h-2 bg-cyan-200 absolute -top-1 rounded-full"></div><span class="text-white text-[10px] font-bold mt-6">${p.sizeLabel}</span></div>`:p.assetType==="gas"?`<div class="w-14 h-20 ${p.color} rounded-2xl flex flex-col items-center"><div class="w-10 h-2 bg-white/30 rounded-full absolute -top-1"></div><span class="text-white text-[9px] font-bold mt-12">${p.sizeLabel}</span></div>`:`<div class="w-14 h-14 ${p.color} rounded-full flex items-center justify-center"><i class="fas fa-cog text-white text-xl"></i></div>`; return `<div class="product-card bg-white rounded-2xl border p-3 cursor-pointer transition-all ${selectedProductId===p.id?'ring-2 ring-teal-500':''}" data-id="${p.id}"><button class="fav-action float-right text-${isFav?'rose-500':'slate-300'} hover:text-rose-400" data-id="${p.id}"><i class="fas fa-heart text-sm"></i></button><div class="flex justify-center items-center h-28 bg-slate-50 rounded-xl mb-2">${assetHtml}</div><h3 class="font-bold text-sm break-words">${escapeHtml(p.name)}</h3><div class="flex justify-between mt-2"><span>★ ${p.rating}</span><span class="font-black text-teal-600 text-sm">KSh ${p.basePrice}</span></div><button class="add-grid-cart w-full mt-3 bg-slate-100 hover:bg-teal-50 text-teal-700 text-xs font-bold py-1.5 rounded-xl" data-id="${p.id}"><i class="fas fa-plus mr-1"></i> Add</button></div>`; }).join(""); }
     function updateDetailPanel(){ let prod=products.find(p=>p.id===selectedProductId); if(!prod)return; document.getElementById("detailTitle").innerText=prod.name; document.getElementById("detailRating").innerText=prod.rating.toFixed(1); document.getElementById("detailDesc").innerText=prod.desc; let hero=document.getElementById("heroVisualContainer"); if(prod.assetType==="water") hero.innerHTML=`<div class="w-32 h-44 ${prod.color} rounded-[36px] flex flex-col items-center justify-center shadow-xl border-4 border-white"><div class="w-12 h-3 bg-cyan-200 absolute -top-2 rounded-full"></div><span class="text-white font-black text-sm">${prod.sizeLabel}</span></div>`; else if(prod.assetType==="gas") hero.innerHTML=`<div class="w-36 h-44 ${prod.color} rounded-[36px] flex flex-col items-center justify-start relative shadow-xl"><div class="w-24 h-8 bg-white/20 rounded-full absolute -top-3"></div><div class="mt-16 text-center"><span class="text-white font-black text-xl">${prod.sizeLabel}</span></div></div>`; else hero.innerHTML=`<div class="w-32 h-32 ${prod.color} rounded-full flex items-center justify-center shadow-2xl border-8 border-white"><i class="fas fa-fire-extinguisher text-white text-4xl"></i></div>`; let modList=modifierMap[prod.category]||modifierMap.accessories; currentModifierStep=0; document.getElementById("modifierSlider").value=0; document.getElementById("sliderStepLabel").innerText=modList[0].label; currentQuantity=1; document.getElementById("quantityValue").innerText=currentQuantity; computeTotalPrice(); }
     function computeTotalPrice(){ let p=products.find(p=>p.id===selectedProductId); if(!p)return; let modCost=(modifierMap[p.category]||modifierMap.accessories)[currentModifierStep]?.premium||0; let total=(p.basePrice+modCost)*currentQuantity; document.getElementById("totalPriceDisplay").innerText=`KSh ${total.toLocaleString()}`; }
 
-    // ------------------- AUTH MANAGER -------------------
-    let currentUser = null;
-    function normalizeKenyanPhone(phone){ let cleaned=phone.replace(/\s+/g,'').replace(/^\+?254/, ''); if(cleaned.startsWith('0')) cleaned=cleaned.slice(1); if(cleaned.match(/^[17]\d{8}$/)) return '254'+cleaned; return null; }
-    function getUsers(){ return JSON.parse(localStorage.getItem("maji_users") || "[]"); }
+    // ------------------- AUTH MANAGER (fixed phone normalization) -------------------
+    function normalizeKenyanPhone(phone) {
+        let cleaned = phone.replace(/\s+/g, '').replace(/^\+?254/, '');
+        if (cleaned.startsWith('0')) cleaned = cleaned.slice(1);
+        if (cleaned.length === 9 && cleaned.match(/^[17]\d{8}$/)) return '254' + cleaned;
+        if (cleaned.length === 12 && cleaned.match(/^254[17]\d{8}$/)) return cleaned;
+        return null;
+    }
+    function getUsers(){ return safeParseJSON(localStorage.getItem("maji_users"), []); }
     function saveUsers(users){ localStorage.setItem("maji_users", JSON.stringify(users)); }
-    function persistSession(user, remember){ let session={ user: user, timestamp: Date.now(), remember: remember }; localStorage.setItem("maji_session", JSON.stringify(session)); currentUser=user; updateAuthUI(); }
-    function logout(){ localStorage.removeItem("maji_session"); currentUser=null; updateAuthUI(); showToast("Logged out successfully"); }
+    function persistSession(user, remember){ let session={ user: user, timestamp: Date.now(), remember: remember }; localStorage.setItem("maji_session", JSON.stringify(session)); currentUser=user; loadCartAndFavs(); updateAuthUI(); renderGrid(); updateCartUI(); }
+    function logout(){ 
+        localStorage.removeItem("maji_session"); 
+        currentUser = null; 
+        loadCartAndFavs(); 
+        updateAuthUI(); 
+        renderGrid(); 
+        updateCartUI(); 
+        showToast("Logged out successfully"); 
+    }
     function updateAuthUI(){ let greetingSpan=document.getElementById("userGreeting"); let dropdown=document.getElementById("dropdownContent"); if(currentUser){ greetingSpan.innerText=currentUser.name.split(' ')[0]; dropdown.innerHTML=`<div class="px-3 py-2 text-sm font-semibold">${escapeHtml(currentUser.name)}</div><div class="border-t"></div><button id="logoutBtnDropdown" class="w-full text-left px-3 py-2 text-sm text-rose-600 hover:bg-slate-50 rounded-lg"><i class="fas fa-sign-out-alt mr-2"></i>Logout</button><button id="myOrdersDropdownBtn" class="w-full text-left px-3 py-2 text-sm hover:bg-slate-50 rounded-lg"><i class="fas fa-receipt mr-2"></i>My Orders</button>`; document.getElementById("logoutBtnDropdown")?.addEventListener("click",()=>{ logout(); closeDropdown(); }); document.getElementById("myOrdersDropdownBtn")?.addEventListener("click",()=>{ openOrdersModal(); closeDropdown(); }); } else { greetingSpan.innerText="Account"; dropdown.innerHTML=`<button id="loginDropdownBtn" class="w-full text-left px-3 py-2 text-sm font-semibold text-teal-600"><i class="fas fa-sign-in-alt mr-2"></i>Login / Signup</button>`; document.getElementById("loginDropdownBtn")?.addEventListener("click",()=>openAuthModal()); } }
     function closeDropdown(){ document.getElementById("userDropdown").classList.add("hidden"); }
     function openAuthModal(){ document.getElementById("authModal").classList.remove("hidden"); }
     function closeAuthModal(){ document.getElementById("authModal").classList.add("hidden"); }
-    function validateSignup(name,email,phone,password,confirm){ let normPhone=normalizeKenyanPhone(phone); if(!normPhone) return "Invalid Kenyan phone number (e.g., 0712345678)"; if(password.length<6) return "Password at least 6 chars"; if(password!==confirm) return "Passwords mismatch"; let users=getUsers(); if(users.find(u=>u.email===email || u.phone===normPhone)) return "Email or phone already registered"; return { success:true, phone:normPhone }; }
+    function validateSignup(name,email,phone,password,confirm){ let normPhone=normalizeKenyanPhone(phone); if(!normPhone) return "Invalid Kenyan phone number (e.g., 0712345678 or 0112345678)"; if(password.length<6) return "Password at least 6 chars"; if(password!==confirm) return "Passwords mismatch"; let users=getUsers(); if(users.find(u=>u.email===email || u.phone===normPhone)) return "Email or phone already registered"; return { success:true, phone:normPhone }; }
     function doSignup(){ let name=document.getElementById("signupName").value, email=document.getElementById("signupEmail").value, phone=document.getElementById("signupPhone").value, pwd=document.getElementById("signupPassword").value, confirm=document.getElementById("signupConfirmPwd").value; let valid=validateSignup(name,email,phone,pwd,confirm); if(valid.success!==true){ showToast(valid,"exclamation-circle"); return; } let newUser={ id:Date.now().toString(), name, email, phone:valid.phone, password:pwd, orders:[] }; let users=getUsers(); users.push(newUser); saveUsers(users); persistSession({ id:newUser.id, name:newUser.name, email:newUser.email, phone:newUser.phone }, false); closeAuthModal(); showToast("Account created! Welcome."); }
     function doLogin(){ 
         let identifier=document.getElementById("loginEmailPhone").value.trim();
@@ -234,66 +285,91 @@
         closeAuthModal(); 
         showToast(`Welcome back, ${user.name}!`);
     }
-    function initAuth(){ let session=localStorage.getItem("maji_session"); if(session){ let data=JSON.parse(session); let users=getUsers(); let userFound=users.find(u=>u.id===data.user.id); if(userFound) currentUser=userFound; else localStorage.removeItem("maji_session"); } updateAuthUI(); }
+    function initAuth(){ let session=localStorage.getItem("maji_session"); if(session){ let data=safeParseJSON(session, null); if(data && data.user){ let users=getUsers(); let userFound=users.find(u=>u.id===data.user.id); if(userFound) currentUser=userFound; else localStorage.removeItem("maji_session"); } } loadCartAndFavs(); updateAuthUI(); }
     
-    // ------------------- ORDER & PAYMENT -------------------
-    function saveOrderToUser(order){ if(currentUser){ let users=getUsers(); let userIndex=users.findIndex(u=>u.id===currentUser.id); if(userIndex!==-1){ users[userIndex].orders=users[userIndex].orders||[]; users[userIndex].orders.unshift(order); saveUsers(users); currentUser=users[userIndex]; updateAuthUI(); } } else { let guestOrders=JSON.parse(localStorage.getItem("maji_guest_orders")||"[]"); guestOrders.unshift(order); localStorage.setItem("maji_guest_orders",JSON.stringify(guestOrders)); } }
-    function getUserOrders(){ if(currentUser){ let users=getUsers(); let user=users.find(u=>u.id===currentUser.id); return user?.orders||[]; } else { return JSON.parse(localStorage.getItem("maji_guest_orders")||"[]"); } }
-    function openOrdersModal(){ let container=document.getElementById("ordersListContainer"); let orders=getUserOrders(); if(orders.length===0){ container.innerHTML='<div class="text-center py-8 text-slate-400">No orders yet</div>'; }else{ container.innerHTML=orders.map(o=>`<div class="border rounded-xl p-4 bg-slate-50"><div class="flex justify-between"><span class="font-bold">#${o.orderId}</span><span class="text-xs bg-emerald-100 px-2 py-1 rounded-full">${o.status}</span></div><div class="text-sm mt-1">${new Date(o.timestamp).toLocaleString()}</div><div class="mt-2 text-sm">Total: <span class="font-bold">KSh ${o.amount.toLocaleString()}</span></div><div class="text-xs text-slate-500">${o.itemsCount} item(s) • Phone: ${o.phone}</div></div>`).join(""); } document.getElementById("ordersModal").classList.remove("hidden"); }
-    let activePaymentTimer=null;
+    // ------------------- ORDER & PAYMENT (race-condition fixed) -------------------
+    let activePaymentPromise = null;
+    function saveOrderToUser(order){ if(currentUser){ let users=getUsers(); let userIndex=users.findIndex(u=>u.id===currentUser.id); if(userIndex!==-1){ users[userIndex].orders=users[userIndex].orders||[]; users[userIndex].orders.unshift(order); saveUsers(users); currentUser=users[userIndex]; updateAuthUI(); } } else { let guestOrders=safeParseJSON(localStorage.getItem("maji_guest_orders"), []); guestOrders.unshift(order); localStorage.setItem("maji_guest_orders", JSON.stringify(guestOrders)); } }
+    function getUserOrders(){ if(currentUser){ let users=getUsers(); let user=users.find(u=>u.id===currentUser.id); return user?.orders||[]; } else { return safeParseJSON(localStorage.getItem("maji_guest_orders"), []); } }
+    function openOrdersModal(){ let container=document.getElementById("ordersListContainer"); let orders=getUserOrders(); if(orders.length===0){ container.innerHTML='<div class="text-center py-8 text-slate-400">No orders yet</div>'; }else{ container.innerHTML=orders.map(o=>`<div class="border rounded-xl p-4 bg-slate-50"><div class="flex justify-between"><span class="font-bold">#${escapeHtml(o.orderId)}</span><span class="text-xs bg-emerald-100 px-2 py-1 rounded-full">${escapeHtml(o.status)}</span></div><div class="text-sm mt-1">${escapeHtml(new Date(o.timestamp).toLocaleString())}</div><div class="mt-2 text-sm">Total: <span class="font-bold">KSh ${escapeHtml(o.amount.toLocaleString())}</span></div><div class="text-xs text-slate-500">${o.itemsCount} item(s) • Phone: ${escapeHtml(o.phone)}</div></div>`).join(""); } document.getElementById("ordersModal").classList.remove("hidden"); }
+    let activePaymentTimer = null;
+    function safeClosePaymentModal() {
+        if (activePaymentTimer) {
+            clearTimeout(activePaymentTimer);
+            activePaymentTimer = null;
+        }
+        document.getElementById("paymentModal").classList.add("hidden");
+        document.getElementById("paymentPhoneStep").classList.remove("hidden");
+        document.getElementById("paymentWaitingStep").classList.add("hidden");
+        document.getElementById("paymentResultStep").classList.add("hidden");
+        document.getElementById("paymentResultStep").innerHTML = "";
+        const btn = document.getElementById("initiatePaymentBtn");
+        if (btn) btn.disabled = false;
+    }
     async function initiatePaymentFlow(totalAmount, onSuccess){
         return new Promise((resolve,reject)=>{
             let phoneInput=document.getElementById("mpesaPhoneInput").value.trim();
             let kenyaNum=normalizeKenyanPhone(phoneInput);
-            if(!kenyaNum){ showToast("Valid Safaricom number required (07XX/01XX)", "times-circle"); reject("invalid"); return; }
+            if(!kenyaNum){ showToast("Valid Safaricom number required (07XX/01XX, 10 digits)", "times-circle"); reject("invalid"); return; }
             document.getElementById("paymentPhoneStep").classList.add("hidden");
             document.getElementById("paymentWaitingStep").classList.remove("hidden");
             let progress=document.getElementById("paymentProgressBar");
             progress.style.width="0%";
             setTimeout(()=>progress.style.width="100%",50);
             activePaymentTimer=setTimeout(()=>{
-                clearTimeout(activePaymentTimer);
+                if(activePaymentTimer) clearTimeout(activePaymentTimer);
+                activePaymentTimer=null;
                 document.getElementById("paymentWaitingStep").classList.add("hidden");
                 document.getElementById("paymentResultStep").classList.remove("hidden");
                 let resultDiv=document.getElementById("paymentResultStep");
                 resultDiv.innerHTML=`<div class="text-center"><i class="fas fa-times-circle text-rose-500 text-5xl"></i><p class="font-bold mt-2">Payment Timeout</p><p class="text-sm text-slate-500">No PIN entered. Retry?</p><div class="flex gap-3 mt-4"><button id="paymentRetryBtn" class="bg-teal-600 text-white px-4 py-2 rounded-xl">Retry</button><button id="paymentCancelFinalBtn" class="bg-slate-200 px-4 py-2 rounded-xl">Cancel</button></div></div>`;
-                document.getElementById("paymentRetryBtn")?.addEventListener("click",()=>{ closePaymentModal(); setTimeout(()=>openPaymentModal(totalAmount),200); });
-                document.getElementById("paymentCancelFinalBtn")?.addEventListener("click",()=>closePaymentModal());
+                document.getElementById("paymentRetryBtn")?.addEventListener("click",()=>{ safeClosePaymentModal(); setTimeout(()=>openPaymentModal(totalAmount),200); });
+                document.getElementById("paymentCancelFinalBtn")?.addEventListener("click",()=>safeClosePaymentModal());
                 reject("timeout");
             },30000);
             setTimeout(()=>{
                 if(activePaymentTimer){
                     clearTimeout(activePaymentTimer);
+                    activePaymentTimer=null;
                     document.getElementById("paymentWaitingStep").classList.add("hidden");
                     document.getElementById("paymentResultStep").classList.remove("hidden");
                     let resultDiv=document.getElementById("paymentResultStep");
                     resultDiv.innerHTML=`<div class="text-center"><i class="fas fa-check-circle text-emerald-500 text-5xl"></i><p class="font-bold mt-2">Payment Successful!</p><p class="text-sm">STK Push confirmed. Order placed.</p><button id="closePaymentSuccessBtn" class="mt-4 bg-slate-800 text-white px-6 py-2 rounded-xl">Close</button></div>`;
-                    document.getElementById("closePaymentSuccessBtn")?.addEventListener("click",()=>{ closePaymentModal(); onSuccess(); resolve(); });
+                    document.getElementById("closePaymentSuccessBtn")?.addEventListener("click",()=>{ safeClosePaymentModal(); onSuccess(); resolve(); });
                 }
             }, 2500);
         });
     }
-    function closePaymentModal(){ let modal=document.getElementById("paymentModal"); if(activePaymentTimer) clearTimeout(activePaymentTimer); modal.classList.add("hidden"); document.getElementById("paymentPhoneStep").classList.remove("hidden"); document.getElementById("paymentWaitingStep").classList.add("hidden"); document.getElementById("paymentResultStep").classList.add("hidden"); }
-    function openPaymentModal(amount){ document.getElementById("paymentOrderAmount").innerText=`KSh ${amount.toLocaleString()}`; document.getElementById("mpesaPhoneInput").value= currentUser?.phone || ""; document.getElementById("paymentModal").classList.remove("hidden"); }
+    function openPaymentModal(amount){ 
+        document.getElementById("paymentOrderAmount").innerText=`KSh ${amount.toLocaleString()}`; 
+        document.getElementById("mpesaPhoneInput").value= currentUser?.phone || ""; 
+        document.getElementById("paymentModal").classList.remove("hidden"); 
+    }
     async function checkoutFlow(){ 
+        if(activePaymentPromise) { showToast("Payment already in progress", "info-circle"); return; }
         if(cart.length===0){ showToast("Cart is empty","times-circle"); return; } 
         let total=cart.reduce((sum,i)=>sum+(i.price*i.quantity),0); 
         openPaymentModal(total); 
-        document.getElementById("initiatePaymentBtn").onclick=async()=>{ 
-            try{ await initiatePaymentFlow(total, async()=>{ 
+        const initiateBtn = document.getElementById("initiatePaymentBtn");
+        const handler = async () => {
+            if(activePaymentPromise) return;
+            activePaymentPromise = initiatePaymentFlow(total, async () => { 
                 let orderId="ORD-"+Date.now(); 
                 let order={ orderId, timestamp:Date.now(), amount:total, itemsCount:cart.length, phone:normalizeKenyanPhone(document.getElementById("mpesaPhoneInput").value)||"2547XXXXXX", status:"Paid", items:[...cart] }; 
                 saveOrderToUser(order); 
                 cart=[]; 
                 saveCart(); 
                 updateCartUI(); 
-                closePaymentModal(); 
+                safeClosePaymentModal(); 
                 showToast(`Order ${orderId} confirmed! Delivery on its way.`); 
-            }); }catch(e){ if(e!=="invalid") showToast("Payment failed","times-circle"); } 
-        }; 
+                activePaymentPromise = null;
+            });
+            try { await activePaymentPromise; } catch(e) { activePaymentPromise = null; }
+        };
+        initiateBtn.onclick = handler;
     }
     
-    // ------------------- EVENT DELEGATION & BINDINGS -------------------
+    // ------------------- EVENT DELEGATION & STATIC BINDINGS -------------------
     function bindDelegatedEvents(){
         const productGrid = document.getElementById("productGrid");
         productGrid.addEventListener("click", (e) => {
@@ -348,7 +424,7 @@
         document.getElementById("doSignupBtn").addEventListener("click",doSignup);
         document.getElementById("forgotPasswordBtn").addEventListener("click",()=>{ showToast("Reset link sent to your email (demo)","envelope"); });
         document.getElementById("guestCheckoutBtnFromAuth").addEventListener("click",()=>{ closeAuthModal(); showToast("Proceeding as guest","info-circle"); checkoutFlow(); });
-        document.getElementById("cancelPaymentBtn")?.addEventListener("click",closePaymentModal);
+        document.getElementById("cancelPaymentBtn")?.addEventListener("click",safeClosePaymentModal);
         document.querySelectorAll(".toggle-pwd").forEach(icon=>{ icon.addEventListener("click",(e)=>{ let input=e.target.closest(".relative")?.querySelector("input"); if(input){ input.type=input.type==="password"?"text":"password"; e.target.classList.toggle("fa-eye-slash"); e.target.classList.toggle("fa-eye"); } }); });
     }
     
