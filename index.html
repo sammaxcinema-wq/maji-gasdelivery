@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=yes">
-    <title>NyumbaniFresh Pro | Multi-Merchant Marketplace</title>
+    <title>NyumbaniFresh Pro | Multi-Merchant Marketplace + Nearby Shops</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -38,6 +38,8 @@
         button:active { transform: scale(0.96); }
         .glass-drawer { background: rgba(255, 255, 255, 0.98); backdrop-filter: blur(20px); }
         .dark .glass-drawer { background: rgba(15, 23, 42, 0.98); }
+        .shop-card { transition: all 0.2s; }
+        .shop-card:hover { transform: translateY(-2px); background: rgba(13,148,136,0.05); }
     </style>
 </head>
 <body class="bg-gradient-to-br from-slate-50 via-white to-slate-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 text-slate-800 dark:text-slate-100 min-h-screen pb-20 md:pb-0 transition-colors duration-300 antialiased">
@@ -52,6 +54,7 @@
             <div class="hidden md:flex flex-1 max-w-md relative"><i class="fas fa-search absolute left-4 top-3.5 text-slate-400"></i><input type="text" id="searchInput" placeholder="Search products across all shops..." class="w-full bg-white/80 dark:bg-slate-800/80 border rounded-2xl py-2.5 pl-11 pr-4 focus:outline-none focus:ring-2 focus:ring-brand-500"></div>
             <div class="flex items-center gap-2">
                 <button id="themeToggleBtn" class="p-2.5 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800"><i class="fas fa-moon text-lg dark:hidden"></i><i class="fas fa-sun text-lg hidden dark:block"></i></button>
+                <button id="nearbyShopsBtn" class="hidden sm:flex items-center gap-1 px-3 py-2 bg-white/80 dark:bg-slate-800/80 rounded-xl border text-xs font-bold hover:bg-brand-50"><i class="fas fa-location-dot text-brand-500"></i> Shops Near Me</button>
                 <button id="tenantSwitchBtn" class="hidden sm:flex items-center gap-2 px-4 py-2 bg-slate-900 text-white dark:bg-white dark:text-slate-900 rounded-xl text-xs font-black"><i class="fas fa-exchange-alt"></i><span id="tenantLabel">Merchant Space</span></button>
                 <button id="favoritesBtn" class="bg-white/80 p-2.5 rounded-xl border"><i class="fas fa-heart text-slate-500 text-lg"></i></button>
                 <button id="ordersHistoryBtn" class="bg-white/80 p-2.5 rounded-xl border"><i class="fas fa-receipt text-slate-700 text-lg"></i></button>
@@ -111,12 +114,16 @@
         <button id="mobileHomeBtn" class="text-brand-500"><i class="fas fa-home text-xl"></i></button>
         <button id="mobileCartBtn" class="relative text-slate-400"><i class="fas fa-shopping-cart text-xl"></i><span id="mobileCartBadge" class="absolute -top-2 -right-3 bg-rose-500 text-white text-[9px] rounded-full px-1.5 min-w-[18px] text-center">0</span></button>
         <button id="mobileOrdersBtn" class="text-slate-400"><i class="fas fa-receipt text-xl"></i></button>
+        <button id="mobileNearbyBtn" class="text-slate-400"><i class="fas fa-location-dot text-xl"></i></button>
         <button id="mobileTenantSwitchBtn" class="text-slate-400"><i class="fas fa-sliders-h text-xl"></i></button>
     </div>
 
     <!-- Cart Drawer -->
     <div id="cartDrawer" class="fixed top-0 right-0 h-full w-full max-w-md glass-drawer shadow-2xl transform translate-x-full transition-transform duration-300 z-50 flex flex-col border-l"><div class="flex justify-between p-5 border-b"><h2 class="text-xl font-black">Your Cart</h2><button id="closeCartBtn"><i class="fas fa-times text-slate-400 text-xl"></i></button></div><div id="cartItemsList" class="flex-1 overflow-y-auto p-4 space-y-3"></div><div class="p-5 border-t space-y-4"><div class="flex justify-between font-black text-lg"><span>Total</span><span id="cartTotalAmount">KSh 0</span></div><button id="cartCheckoutBtn" class="w-full bg-emerald-600 py-3.5 rounded-xl font-bold shadow-lg">Proceed to M-PESA</button></div></div>
     <div id="drawerOverlay" class="fixed inset-0 bg-black/40 backdrop-blur-sm hidden z-45"></div>
+
+    <!-- Nearby Shops Modal -->
+    <div id="nearbyModal" class="fixed inset-0 bg-black/60 backdrop-blur-md flex items-center justify-center z-50 hidden"><div class="bg-white dark:bg-slate-800 rounded-3xl max-w-2xl w-full mx-4 max-h-[85vh] overflow-auto p-6"><div class="flex justify-between items-center mb-4"><h2 class="text-2xl font-black"><i class="fas fa-store text-brand-500 mr-2"></i>Shops Near You</h2><button id="closeNearbyModal" class="text-slate-400"><i class="fas fa-times text-xl"></i></button></div><div id="locationStatus" class="text-sm text-slate-500 mb-3 flex items-center gap-2"><i class="fas fa-map-marker-alt"></i> <span id="locationMsg">Detecting your location...</span></div><div class="flex gap-2 mb-4"><button id="useGeolocationBtn" class="bg-brand-600 text-white px-3 py-1.5 rounded-xl text-xs font-bold"><i class="fas fa-satellite-dish"></i> Use My Location</button><select id="manualCitySelect" class="border rounded-xl px-3 py-1.5 text-sm bg-white dark:bg-slate-700"><option value="">-- Select City --</option><option value="Nairobi">Nairobi</option><option value="Mombasa">Mombasa</option><option value="Kisumu">Kisumu</option><option value="Nakuru">Nakuru</option></select><button id="manualCityApplyBtn" class="bg-slate-700 text-white px-3 py-1.5 rounded-xl text-xs font-bold">Apply</button></div><div id="nearbyShopsList" class="space-y-3 max-h-96 overflow-y-auto"></div></div></div>
 
     <!-- Auth Modal -->
     <div id="authModal" class="fixed inset-0 bg-black/50 backdrop-blur-md flex items-center justify-center z-50 hidden"><div class="bg-white dark:bg-slate-800 rounded-3xl max-w-md w-full p-6"><button id="closeAuthModal" class="float-right"><i class="fas fa-times"></i></button><div class="flex gap-4 border-b mb-5"><button id="authLoginTab" class="pb-2 font-black text-brand-600 border-b-2 border-brand-600">Login</button><button id="authSignupTab" class="pb-2 font-semibold text-slate-400">Sign Up</button></div><div id="authLoginForm" class="space-y-4"><input type="text" id="loginEmailPhone" placeholder="Email / Phone" class="w-full p-3 border rounded-xl"><div class="relative"><input type="password" id="loginPassword" placeholder="Password" class="w-full p-3 border rounded-xl"><i class="fas fa-eye-slash toggle-pwd absolute right-3 top-4 cursor-pointer"></i></div><button id="doLoginBtn" class="w-full bg-brand-600 text-white p-3 rounded-xl font-bold">Login</button><button id="guestCheckoutBtnFromAuth" class="text-center w-full text-sm text-brand-500">Continue as Guest</button></div><div id="authSignupForm" class="space-y-4 hidden"><input type="text" id="signupName" placeholder="Full Name" class="w-full p-3 border rounded-xl"><input type="email" id="signupEmail" placeholder="Email" class="w-full p-3 border rounded-xl"><input type="tel" id="signupPhone" placeholder="0712345678" class="w-full p-3 border rounded-xl"><input type="password" id="signupPassword" placeholder="Password" class="w-full p-3 border rounded-xl"><input type="password" id="signupConfirmPwd" placeholder="Confirm" class="w-full p-3 border rounded-xl"><button id="doSignupBtn" class="w-full bg-emerald-600 text-white p-3 rounded-xl font-bold">Create Account</button></div></div></div>
@@ -131,28 +138,32 @@
     <div id="toast" class="fixed bottom-24 left-1/2 -translate-x-1/2 bg-slate-900 dark:bg-white text-white dark:text-slate-900 px-5 py-3 rounded-full shadow-2xl flex items-center gap-2 opacity-0 pointer-events-none transition-all duration-300 z-50 text-xs font-bold"><i class="fas fa-check-circle text-emerald-400"></i><span id="toastMsg"></span></div>
 
     <script>
-        // ==================== MULTI-SHOP DATA MODEL ====================
+        // ==================== MULTI-SHOP DATA MODEL WITH LOCATIONS ====================
         let shops = [
-            { id: "shop1", name: "Nairobi Fresh Water", description: "Premium water refills", ownerId: "merchant1", active: true, createdAt: Date.now() },
-            { id: "shop2", name: "Mombasa Gas Hub", description: "LPG cylinders and accessories", ownerId: "merchant1", active: true, createdAt: Date.now() }
+            { id: "shop1", name: "Nairobi Fresh Water", city: "Nairobi", lat: -1.286389, lng: 36.817223, description: "Premium water refills", ownerId: "merchant1", active: true, createdAt: Date.now() },
+            { id: "shop2", name: "Mombasa Gas Hub", city: "Mombasa", lat: -4.043477, lng: 39.668206, description: "LPG cylinders and accessories", ownerId: "merchant1", active: true, createdAt: Date.now() },
+            { id: "shop3", name: "Kisumu Eco Water", city: "Kisumu", lat: -0.091702, lng: 34.767956, description: "Natural mineral water refills", ownerId: "merchant1", active: true, createdAt: Date.now() },
+            { id: "shop4", name: "Nakuru Gas & More", city: "Nakuru", lat: -0.303099, lng: 36.080026, description: "Gas cylinders and regulators", ownerId: "merchant1", active: true, createdAt: Date.now() }
         ];
         
         let products = [
             { id: "p1", name: "20L Pure Water Refill", category: "water", basePrice: 350, rating: 4.9, desc: "Premium ultra-filtered drinking water. BPA-free container.", assetType: "water", color: "from-cyan-400 to-cyan-600", sizeLabel: "20L", shopId: "shop1" },
             { id: "p2", name: "6kg Gas Cylinder Refill", category: "gas", basePrice: 1250, rating: 4.7, desc: "Portable LPG canister with certified safety valve.", assetType: "gas", color: "from-emerald-400 to-emerald-600", sizeLabel: "6KG", shopId: "shop2" },
             { id: "p3", name: "13kg Gas Cylinder Refill", category: "gas", basePrice: 1540, rating: 4.8, desc: "Household LPG refill. KEBS approved.", assetType: "gas", color: "from-teal-400 to-teal-600", sizeLabel: "13KG", shopId: "shop2" },
-            { id: "p4", name: "Brass Gas Regulator", category: "accessories", basePrice: 850, rating: 4.5, desc: "Auto-shutoff regulator, prevents leaks.", assetType: "accessory", color: "from-amber-400 to-amber-600", sizeLabel: "KIT", shopId: "shop2" }
+            { id: "p4", name: "Brass Gas Regulator", category: "accessories", basePrice: 850, rating: 4.5, desc: "Auto-shutoff regulator, prevents leaks.", assetType: "accessory", color: "from-amber-400 to-amber-600", sizeLabel: "KIT", shopId: "shop2" },
+            { id: "p5", name: "10L Mineral Water", category: "water", basePrice: 250, rating: 4.6, desc: "Crisp and clean natural spring water.", assetType: "water", color: "from-cyan-400 to-cyan-600", sizeLabel: "10L", shopId: "shop3" },
+            { id: "p6", name: "Gas Hose 1.5m", category: "accessories", basePrice: 450, rating: 4.4, desc: "Heavy duty gas hose with clamps.", assetType: "accessory", color: "from-amber-400 to-amber-600", sizeLabel: "", shopId: "shop4" }
         ];
 
         const modifierMap = { water: [{label:"Standard Cap",premium:0},{label:"Silicone Pump",premium:150},{label:"Deluxe Spigot",premium:350}], gas:[{label:"Standard Valve",premium:0},{label:"Threaded Premium",premium:200},{label:"Industrial Gauge",premium:450}], accessories:[{label:"Basic Fittings",premium:0},{label:"Reinforced Hose",premium:100},{label:"Full Kit",premium:250}] };
         
-        // Global state
-        let currentCategory = "all", currentSearch = "", selectedProductId = "p3", currentQuantity = 1, currentModifierStep = 0, activeTenantSpace = "client";
+        // Global state (abbreviated for brevity, same as previous working version)
+        let currentCategory = "all", currentSearch = "", selectedProductId = "p1", currentQuantity = 1, currentModifierStep = 0, activeTenantSpace = "client";
         let cart = [], favorites = new Set(), currentUser = null, activePaymentTimer = null;
         let currentShopFilter = "all";
         let currentMerchantSelectedShopId = "shop1";
 
-        // Helper functions
+        // Helper functions (standard)
         function safeParseJSON(s, fallback=[]){ try{ return JSON.parse(s)||fallback; }catch(e){ return fallback; } }
         function getUserKey(){ return `nyumbani_${currentUser?.id||'guest'}`; }
         function escapeHtml(s){ return s.replace(/[&<>'"]/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[m])); }
@@ -160,122 +171,116 @@
         function showToast(msg, icon="check-circle"){ let t=document.getElementById("toast"); document.getElementById("toastMsg").innerHTML=`<i class="fas fa-${icon} mr-2"></i>${msg}`; t.classList.remove("opacity-0","pointer-events-none"); t.classList.add("opacity-100"); setTimeout(()=>{ t.classList.remove("opacity-100"); t.classList.add("opacity-0","pointer-events-none"); },2500); }
         function updateSliderTrackFill(el){ let percent=((el.value-el.min)/(el.max-el.min))*100; el.style.setProperty('--fill-percent', percent+'%'); }
 
-        // Persistence
+        // Persistence (same as before)
         function saveCart(){ localStorage.setItem(getUserKey()+'_cart', JSON.stringify(cart)); updateCartUI(); }
         function saveFavs(){ localStorage.setItem(getUserKey()+'_favorites', JSON.stringify([...favorites])); }
         function loadCartAndFavs(){ cart = safeParseJSON(localStorage.getItem(getUserKey()+'_cart'), []); favorites = new Set(safeParseJSON(localStorage.getItem(getUserKey()+'_favorites'), [])); }
         function addToCart(p, modStep, qty){ let list=modifierMap[p.category]||modifierMap.accessories; let mod=list[modStep]; let price=p.basePrice+(mod?.premium||0); let idx=cart.findIndex(i=>i.id===p.id && i.modifierStep===modStep); if(idx!==-1) cart[idx].quantity+=qty; else cart.push({ id:p.id, name:p.name, price, quantity:qty, modifierStep:modStep, modifierLabel:mod.label, category:p.category, shopId:p.shopId, shopName:getShopById(p.shopId)?.name }); saveCart(); showToast(`${p.name} added to cart`); }
         function getShopById(id){ return shops.find(s=>s.id===id); }
         
-        // Rendering client grid with shop filter
-        function renderGrid(){
+        // Rendering functions (keep from previous working version)
+        function renderGrid(){ /* same as before, omitted for brevity but fully functional */ 
             let filtered = products.filter(p => (currentCategory==="all"||p.category===currentCategory) && p.name.toLowerCase().includes(currentSearch.toLowerCase()));
             if(currentShopFilter !== "all") filtered = filtered.filter(p => p.shopId === currentShopFilter);
             let grid = document.getElementById("productGrid");
             if(!grid) return;
             if(filtered.length===0){ grid.innerHTML='<div class="col-span-full text-center py-20 text-slate-400 text-sm">No products found</div>'; return; }
-            grid.innerHTML = filtered.map(p => {
-                let isFav = favorites.has(p.id);
-                let shop = getShopById(p.shopId);
-                let assetHtml = p.assetType==="water"?`<div class="w-12 h-16 bg-gradient-to-br ${p.color} rounded-xl flex flex-col items-center justify-center shadow-md"><span class="text-white font-black text-[10px]">${p.sizeLabel}</span></div>` : p.assetType==="gas"?`<div class="w-12 h-14 bg-gradient-to-br ${p.color} rounded-xl flex items-center justify-center"><span class="text-white font-black text-[10px]">${p.sizeLabel}</span></div>`:`<div class="w-14 h-14 bg-gradient-to-br ${p.color} rounded-full flex items-center justify-center"><i class="fas fa-cog text-white text-lg"></i></div>`;
-                return `<div class="product-card bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm rounded-2xl border p-4 cursor-pointer transition-all ${selectedProductId===p.id?'ring-2 ring-brand-500':''}" data-id="${p.id}"><div class="flex justify-between"><button class="fav-action text-${isFav?'rose-500':'slate-300'}" data-id="${p.id}"><i class="${isFav?'fas':'far'} fa-heart text-base"></i></button><span class="text-[10px] font-bold">★ ${p.rating}</span></div><div class="flex justify-center my-3">${assetHtml}</div><div><h3 class="font-bold text-sm">${escapeHtml(p.name)}</h3><p class="text-[10px] text-brand-500 mt-0.5"><i class="fas fa-store"></i> ${escapeHtml(shop?.name||'')}</p></div><div class="flex justify-between mt-3 items-center"><span class="font-black text-brand-600 text-sm">KSh ${p.basePrice}</span><button class="add-grid-cart bg-slate-100 dark:bg-slate-700 px-3 py-1.5 rounded-xl text-xs font-bold" data-id="${p.id}">+ Add</button></div></div>`;
-            }).join("");
+            grid.innerHTML = filtered.map(p => { let isFav = favorites.has(p.id); let shop = getShopById(p.shopId); let assetHtml = p.assetType==="water"?`<div class="w-12 h-16 bg-gradient-to-br ${p.color} rounded-xl flex flex-col items-center justify-center shadow-md"><span class="text-white font-black text-[10px]">${p.sizeLabel}</span></div>` : p.assetType==="gas"?`<div class="w-12 h-14 bg-gradient-to-br ${p.color} rounded-xl flex items-center justify-center"><span class="text-white font-black text-[10px]">${p.sizeLabel}</span></div>`:`<div class="w-14 h-14 bg-gradient-to-br ${p.color} rounded-full flex items-center justify-center"><i class="fas fa-cog text-white text-lg"></i></div>`;
+            return `<div class="product-card bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm rounded-2xl border p-4 cursor-pointer transition-all ${selectedProductId===p.id?'ring-2 ring-brand-500':''}" data-id="${p.id}"><div class="flex justify-between"><button class="fav-action text-${isFav?'rose-500':'slate-300'}" data-id="${p.id}"><i class="${isFav?'fas':'far'} fa-heart text-base"></i></button><span class="text-[10px] font-bold">★ ${p.rating}</span></div><div class="flex justify-center my-3">${assetHtml}</div><div><h3 class="font-bold text-sm">${escapeHtml(p.name)}</h3><p class="text-[10px] text-brand-500 mt-0.5"><i class="fas fa-store"></i> ${escapeHtml(shop?.name||'')}</p></div><div class="flex justify-between mt-3 items-center"><span class="font-black text-brand-600 text-sm">KSh ${p.basePrice}</span><button class="add-grid-cart bg-slate-100 dark:bg-slate-700 px-3 py-1.5 rounded-xl text-xs font-bold" data-id="${p.id}">+ Add</button></div></div>`; }).join("");
         }
-        
-        function updateDetailPanel(){
-            let p = products.find(p=>p.id===selectedProductId);
-            if(!p) return;
-            let shop = getShopById(p.shopId);
-            document.getElementById("detailTitle").innerText = p.name;
-            document.getElementById("detailRating").innerText = p.rating.toFixed(1);
-            document.getElementById("detailDesc").innerText = p.desc;
-            document.getElementById("detailShopName").innerText = shop?.name || '';
-            let hero = document.getElementById("heroVisualContainer");
-            hero.innerHTML = `<div class="w-24 h-32 bg-gradient-to-br ${p.color} rounded-3xl flex items-center justify-center shadow-2xl border-4 border-white"><span class="text-white font-black text-lg">${p.sizeLabel||''}</span></div>`;
-            let list = modifierMap[p.category]||modifierMap.accessories;
-            let slider = document.getElementById("modifierSlider");
-            currentModifierStep = 0; slider.value = 0; slider.max = list.length-1;
-            updateSliderTrackFill(slider);
-            document.getElementById("sliderStepLabel").innerText = list[0].label;
-            currentQuantity = 1; document.getElementById("quantityValue").innerText = 1;
-            computeTotalPrice();
-        }
+        function updateDetailPanel(){ /* same logic */ let p=products.find(p=>p.id===selectedProductId); if(!p) return; let shop=getShopById(p.shopId); document.getElementById("detailTitle").innerText=p.name; document.getElementById("detailRating").innerText=p.rating.toFixed(1); document.getElementById("detailDesc").innerText=p.desc; document.getElementById("detailShopName").innerText=shop?.name||''; let hero=document.getElementById("heroVisualContainer"); hero.innerHTML=`<div class="w-24 h-32 bg-gradient-to-br ${p.color} rounded-3xl flex items-center justify-center shadow-2xl border-4 border-white"><span class="text-white font-black text-lg">${p.sizeLabel||''}</span></div>`; let list=modifierMap[p.category]||modifierMap.accessories; let slider=document.getElementById("modifierSlider"); currentModifierStep=0; slider.value=0; slider.max=list.length-1; updateSliderTrackFill(slider); document.getElementById("sliderStepLabel").innerText=list[0].label; currentQuantity=1; document.getElementById("quantityValue").innerText=1; computeTotalPrice(); }
         function computeTotalPrice(){ let p=products.find(p=>p.id===selectedProductId); if(!p) return; let cost=(modifierMap[p.category]||modifierMap.accessories)[currentModifierStep]?.premium||0; let total=(p.basePrice+cost)*currentQuantity; document.getElementById("totalPriceDisplay").innerText=`KSh ${total.toLocaleString()}`; }
-        function renderCartDrawer(){
-            let c=document.getElementById("cartItemsList"); if(!c) return;
-            if(cart.length===0){ c.innerHTML='<div class="text-center text-slate-400 py-16 text-xs">Cart empty</div>'; document.getElementById("cartTotalAmount").innerText="KSh 0"; return; }
-            let total=0;
-            c.innerHTML = cart.map(i=>{ total+=i.price*i.quantity; return `<div class="flex justify-between p-3 bg-slate-50 dark:bg-slate-900 rounded-xl"><div><p class="font-bold text-sm">${escapeHtml(i.name)}</p><p class="text-[10px] text-slate-400">${escapeHtml(i.modifierLabel)} × ${i.quantity}</p><p class="text-[9px] text-brand-500 mt-0.5"><i class="fas fa-store"></i> ${escapeHtml(i.shopName||'')}</p></div><div class="flex items-center gap-3"><span class="font-black">KSh ${(i.price*i.quantity).toLocaleString()}</span><button class="remove-cart-item text-rose-500" data-id="${i.id}" data-step="${i.modifierStep}"><i class="fas fa-trash-alt"></i></button></div></div>`; }).join("");
-            document.getElementById("cartTotalAmount").innerText=`KSh ${total.toLocaleString()}`;
-        }
+        function renderCartDrawer(){ let c=document.getElementById("cartItemsList"); if(!c) return; if(cart.length===0){ c.innerHTML='<div class="text-center text-slate-400 py-16 text-xs">Cart empty</div>'; document.getElementById("cartTotalAmount").innerText="KSh 0"; return; } let total=0; c.innerHTML=cart.map(i=>{ total+=i.price*i.quantity; return `<div class="flex justify-between p-3 bg-slate-50 dark:bg-slate-900 rounded-xl"><div><p class="font-bold text-sm">${escapeHtml(i.name)}</p><p class="text-[10px] text-slate-400">${escapeHtml(i.modifierLabel)} × ${i.quantity}</p><p class="text-[9px] text-brand-500 mt-0.5"><i class="fas fa-store"></i> ${escapeHtml(i.shopName||'')}</p></div><div class="flex items-center gap-3"><span class="font-black">KSh ${(i.price*i.quantity).toLocaleString()}</span><button class="remove-cart-item text-rose-500" data-id="${i.id}" data-step="${i.modifierStep}"><i class="fas fa-trash-alt"></i></button></div></div>`; }).join(""); document.getElementById("cartTotalAmount").innerText=`KSh ${total.toLocaleString()}`; }
         function updateCartUI(){ let cnt=cart.reduce((s,i)=>s+i.quantity,0); document.getElementById("cartCountBadge").innerText=cnt; document.getElementById("mobileCartBadge").innerText=cnt; renderCartDrawer(); }
 
-        // Merchant: render shops dropdown and products for selected shop
-        function renderMerchantShopsSelector(){
-            let sel = document.getElementById("merchantShopSelector");
-            if(!sel) return;
-            let ownedShops = shops.filter(s => s.ownerId === (currentUser?.id || "merchant1"));
-            sel.innerHTML = ownedShops.map(s => `<option value="${s.id}" ${currentMerchantSelectedShopId===s.id?'selected':''}>${escapeHtml(s.name)}</option>`).join('');
-            if(ownedShops.length===0) sel.innerHTML = '<option disabled>No shops created</option>';
-        }
-        function renderMerchantProductTable(){
-            let tbody = document.getElementById("merchantProductTableBody");
-            if(!tbody) return;
-            let shopProducts = products.filter(p => p.shopId === currentMerchantSelectedShopId);
-            tbody.innerHTML = shopProducts.map(p => `
-                <tr class="border-b"><td class="p-3 font-bold">${escapeHtml(p.name)}</td><td class="p-3">${p.category}</td><td class="p-3">KSh ${p.basePrice}</td><td class="p-3 text-right"><button class="delete-product-btn text-rose-500 text-xs" data-id="${p.id}"><i class="fas fa-trash-alt"></i> Delete</button></td></tr>
-            `).join('');
-            if(shopProducts.length===0) tbody.innerHTML = '<tr><td colspan="4" class="p-4 text-center text-slate-400">No products in this shop. Add one.</td></tr>';
-            document.querySelectorAll(".delete-product-btn").forEach(btn => btn.addEventListener("click", (e) => { let pid = btn.dataset.id; products = products.filter(p => p.id !== pid); renderMerchantProductTable(); renderGrid(); showToast("Product deleted"); }));
-        }
-        function renderMerchantMetrics(){
-            let container = document.getElementById("merchantMetrics");
-            let shopProducts = products.filter(p => p.shopId === currentMerchantSelectedShopId);
-            let shopOrders = getUserOrders().filter(o => o.shopId === currentMerchantSelectedShopId);
-            let totalRevenue = shopOrders.reduce((s,o)=>s+o.amount,0);
-            container.innerHTML = `<div class="bg-white/70 dark:bg-slate-800/70 p-4 rounded-2xl border"><p class="text-xs font-bold text-slate-400">Products</p><h3 class="text-2xl font-black">${shopProducts.length}</h3></div><div class="bg-white/70 dark:bg-slate-800/70 p-4 rounded-2xl border"><p class="text-xs font-bold text-slate-400">Total Orders</p><h3 class="text-2xl font-black">${shopOrders.length}</h3></div><div class="bg-white/70 dark:bg-slate-800/70 p-4 rounded-2xl border"><p class="text-xs font-bold text-slate-400">Revenue (KSh)</p><h3 class="text-2xl font-black">${totalRevenue.toLocaleString()}</h3></div>`;
-            let ordersContainer = document.getElementById("merchantOrdersList");
-            if(ordersContainer) ordersContainer.innerHTML = shopOrders.length ? shopOrders.map(o => `<div class="p-2 border-b text-xs flex justify-between"><span>${o.orderId}</span><span>KSh ${o.amount}</span><span class="text-emerald-500">${o.status}</span></div>`).join('') : '<div class="text-slate-400 text-sm p-2">No orders yet</div>';
-        }
+        // Merchant functions (same as before)
+        function renderMerchantShopsSelector(){ let sel=document.getElementById("merchantShopSelector"); if(!sel) return; let ownedShops=shops.filter(s=>s.ownerId===(currentUser?.id||"merchant1")); sel.innerHTML=ownedShops.map(s=>`<option value="${s.id}" ${currentMerchantSelectedShopId===s.id?'selected':''}>${escapeHtml(s.name)}</option>`).join(''); if(ownedShops.length===0) sel.innerHTML='<option disabled>No shops created</option>'; }
+        function renderMerchantProductTable(){ let tbody=document.getElementById("merchantProductTableBody"); if(!tbody) return; let shopProducts=products.filter(p=>p.shopId===currentMerchantSelectedShopId); tbody.innerHTML=shopProducts.map(p=>`<tr class="border-b"><td class="p-3 font-bold">${escapeHtml(p.name)}</td><td class="p-3">${p.category}</td><td class="p-3">KSh ${p.basePrice}</td><td class="p-3 text-right"><button class="delete-product-btn text-rose-500 text-xs" data-id="${p.id}"><i class="fas fa-trash-alt"></i> Delete</button></td></tr>`).join(''); if(shopProducts.length===0) tbody.innerHTML='<tr><td colspan="4" class="p-4 text-center text-slate-400">No products in this shop. Add one.</td></tr>'; document.querySelectorAll(".delete-product-btn").forEach(btn=>btn.addEventListener("click",(e)=>{ let pid=btn.dataset.id; products=products.filter(p=>p.id!==pid); renderMerchantProductTable(); renderGrid(); showToast("Product deleted"); })); }
+        function renderMerchantMetrics(){ let container=document.getElementById("merchantMetrics"); let shopProducts=products.filter(p=>p.shopId===currentMerchantSelectedShopId); let shopOrders=getUserOrders().filter(o=>o.shopId===currentMerchantSelectedShopId); let totalRevenue=shopOrders.reduce((s,o)=>s+o.amount,0); container.innerHTML=`<div class="bg-white/70 dark:bg-slate-800/70 p-4 rounded-2xl border"><p class="text-xs font-bold text-slate-400">Products</p><h3 class="text-2xl font-black">${shopProducts.length}</h3></div><div class="bg-white/70 dark:bg-slate-800/70 p-4 rounded-2xl border"><p class="text-xs font-bold text-slate-400">Total Orders</p><h3 class="text-2xl font-black">${shopOrders.length}</h3></div><div class="bg-white/70 dark:bg-slate-800/70 p-4 rounded-2xl border"><p class="text-xs font-bold text-slate-400">Revenue (KSh)</p><h3 class="text-2xl font-black">${totalRevenue.toLocaleString()}</h3></div>`; let ordersContainer=document.getElementById("merchantOrdersList"); if(ordersContainer) ordersContainer.innerHTML=shopOrders.length?shopOrders.map(o=>`<div class="p-2 border-b text-xs flex justify-between"><span>${o.orderId}</span><span>KSh ${o.amount}</span><span class="text-emerald-500">${o.status}</span></div>`).join(''):'<div class="text-slate-400 text-sm p-2">No orders yet</div>'; }
         
-        // Auth and order utilities
+        // Auth and order (same as before)
         function getUsers(){ return safeParseJSON(localStorage.getItem("maji_users"), []); }
         function saveUsers(u){ localStorage.setItem("maji_users", JSON.stringify(u)); }
         function persistSession(user){ localStorage.setItem("maji_session", JSON.stringify({user})); currentUser=user; loadCartAndFavs(); updateAuthUI(); renderGrid(); updateCartUI(); renderMerchantShopsSelector(); if(activeTenantSpace==="merchant"){ renderMerchantProductTable(); renderMerchantMetrics(); } }
         function logout(){ localStorage.removeItem("maji_session"); currentUser=null; loadCartAndFavs(); updateAuthUI(); renderGrid(); updateCartUI(); showToast("Logged out"); }
         function updateAuthUI(){ let span=document.getElementById("userGreeting"), dd=document.getElementById("userDropdown"); if(currentUser){ span.innerText=currentUser.name.split(' ')[0]; dd.innerHTML=`<div class="p-3 font-bold">${escapeHtml(currentUser.name)}</div><div class="border-t"></div><button id="logoutBtnDropdown" class="w-full text-left px-3 py-2 text-rose-500 text-sm">Logout</button><button id="myOrdersDropdownBtn" class="w-full text-left px-3 py-2 text-sm">My Orders</button>`; document.getElementById("logoutBtnDropdown")?.addEventListener("click",logout); document.getElementById("myOrdersDropdownBtn")?.addEventListener("click",openOrdersModal); }else{ span.innerText="Account"; dd.innerHTML=`<button id="loginDropdownBtn" class="w-full text-center p-3 text-brand-600 font-bold">Login / Signup</button>`; document.getElementById("loginDropdownBtn")?.addEventListener("click",()=>document.getElementById("authModal").classList.remove("hidden")); } }
         function closeAuthModal(){ document.getElementById("authModal").classList.add("hidden"); }
-        function doSignup(){ 
-            let name=document.getElementById("signupName").value, email=document.getElementById("signupEmail").value, phone=document.getElementById("signupPhone").value, pwd=document.getElementById("signupPassword").value, conf=document.getElementById("signupConfirmPwd").value; 
-            let norm=normalizePhone(phone); if(!norm||pwd!==conf||pwd.length<6){ showToast("Invalid phone or password mismatch"); return; } 
-            let users=getUsers(); if(users.find(u=>u.email===email||u.phone===norm)){ showToast("User exists"); return; } 
-            let role = confirm("Register as Merchant? (Cancel = Client)") ? "merchant" : "client";
-            let newUser={ id:Date.now().toString(), name, email, phone:norm, password:pwd, orders:[], role };
-            users.push(newUser); saveUsers(users); 
-            persistSession({ id:newUser.id, name:newUser.name, role:newUser.role }); 
-            closeAuthModal(); showToast(`Account created as ${role}!`); 
-            if(role==="merchant"){ setTimeout(()=>{ document.getElementById("tenantSwitchBtn").click(); },500); }
-        }
-        function doLogin(){ 
-            let id=document.getElementById("loginEmailPhone").value.trim(); let pwd=document.getElementById("loginPassword").value; 
-            let users=getUsers(); let normPhone=normalizePhone(id); 
-            let user=users.find(u=>(u.email===id||u.phone===normPhone)&&u.password===pwd); 
-            if(!user){ showToast("Invalid credentials"); return; } 
-            persistSession({ id:user.id, name:user.name, role:user.role }); closeAuthModal(); 
-        }
+        function doSignup(){ let name=document.getElementById("signupName").value, email=document.getElementById("signupEmail").value, phone=document.getElementById("signupPhone").value, pwd=document.getElementById("signupPassword").value, conf=document.getElementById("signupConfirmPwd").value; let norm=normalizePhone(phone); if(!norm||pwd!==conf||pwd.length<6){ showToast("Invalid phone or password mismatch"); return; } let users=getUsers(); if(users.find(u=>u.email===email||u.phone===norm)){ showToast("User exists"); return; } let role = confirm("Register as Merchant? (Cancel = Client)") ? "merchant" : "client"; let newUser={ id:Date.now().toString(), name, email, phone:norm, password:pwd, orders:[], role }; users.push(newUser); saveUsers(users); persistSession({ id:newUser.id, name:newUser.name, role:newUser.role }); closeAuthModal(); showToast(`Account created as ${role}!`); if(role==="merchant"){ setTimeout(()=>{ document.getElementById("tenantSwitchBtn").click(); },500); } }
+        function doLogin(){ let id=document.getElementById("loginEmailPhone").value.trim(); let pwd=document.getElementById("loginPassword").value; let users=getUsers(); let normPhone=normalizePhone(id); let user=users.find(u=>(u.email===id||u.phone===normPhone)&&u.password===pwd); if(!user){ showToast("Invalid credentials"); return; } persistSession({ id:user.id, name:user.name, role:user.role }); closeAuthModal(); }
         function getUserOrders(){ return currentUser ? (getUsers().find(u=>u.id===currentUser.id)?.orders||[]) : safeParseJSON(localStorage.getItem("maji_guest_orders"),[]); }
         function saveOrderToUser(order){ let ordersArr=getUserOrders(); ordersArr.unshift(order); if(currentUser){ let users=getUsers(); let idx=users.findIndex(u=>u.id===currentUser.id); if(idx!==-1){ users[idx].orders=ordersArr; saveUsers(users); } }else{ localStorage.setItem("maji_guest_orders",JSON.stringify(ordersArr)); } if(activeTenantSpace==="merchant") renderMerchantMetrics(); }
         function openOrdersModal(){ let list=getUserOrders(); let container=document.getElementById("ordersListContainer"); if(list.length===0) container.innerHTML='<div class="text-center py-10">No orders</div>'; else container.innerHTML=list.map(o=>`<div class="border p-3 rounded-xl"><div class="flex justify-between"><span class="font-mono">${o.orderId}</span><span class="text-emerald-600 text-xs">${o.status}</span></div><div>${new Date(o.timestamp).toLocaleString()}</div><div class="font-black">KSh ${o.amount}</div><div class="text-xs text-slate-400">Shop: ${escapeHtml(o.shopName||'')}</div></div>`).join(''); document.getElementById("ordersModal").classList.remove("hidden"); }
         async function checkoutFlow(){ if(cart.length===0){ showToast("Cart empty"); return; } let total=cart.reduce((s,i)=>s+i.price*i.quantity,0); document.getElementById("paymentOrderAmount").innerText=`KSh ${total.toLocaleString()}`; document.getElementById("mpesaPhoneInput").value=currentUser?.phone||""; document.getElementById("paymentModal").classList.remove("hidden"); let initBtn=document.getElementById("initiatePaymentBtn"); initBtn.onclick=()=>{ let phone=normalizePhone(document.getElementById("mpesaPhoneInput").value); if(!phone){ showToast("Valid Safaricom number required"); return; } document.getElementById("paymentPhoneStep").classList.add("hidden"); document.getElementById("paymentWaitingStep").classList.remove("hidden"); let prog=document.getElementById("paymentProgressBar"); prog.style.width="0%"; setTimeout(()=>{ prog.style.width="100%"; },50); activePaymentTimer=setTimeout(()=>{ safeClosePaymentModal(); showToast("Payment timeout"); },30000); setTimeout(()=>{ if(activePaymentTimer){ clearTimeout(activePaymentTimer); activePaymentTimer=null; document.getElementById("paymentWaitingStep").classList.add("hidden"); document.getElementById("paymentResultStep").classList.remove("hidden"); document.getElementById("paymentResultStep").innerHTML=`<div class="text-center"><i class="fas fa-check-circle text-5xl text-emerald-500 mb-2"></i><p class="font-bold">Payment Success!</p><button id="closePaySuccess" class="mt-3 bg-brand-500 px-4 py-2 rounded-xl text-white">Close</button></div>`; document.getElementById("closePaySuccess")?.addEventListener("click",()=>{ let orderId="NF-"+Date.now(); let shopIds=[...new Set(cart.map(i=>i.shopId))]; let shopName=shopIds.length===1?cart[0].shopName:"Multiple Shops"; saveOrderToUser({ orderId, timestamp:Date.now(), amount:total, itemsCount:cart.length, phone, status:"Paid", shopId:shopIds[0], shopName }); cart=[]; saveCart(); updateCartUI(); safeClosePaymentModal(); showToast(`Order ${orderId} placed!`); }); } },2500); }; }
         function safeClosePaymentModal(){ if(activePaymentTimer) clearTimeout(activePaymentTimer); document.getElementById("paymentModal").classList.add("hidden"); document.getElementById("paymentPhoneStep").classList.remove("hidden"); document.getElementById("paymentWaitingStep").classList.add("hidden"); document.getElementById("paymentResultStep").classList.add("hidden").innerHTML=""; }
 
-        // Merchant shop creation
-        function addNewShop(){ let name=prompt("Enter shop name:"); if(!name) return; let newId="shop"+Date.now(); shops.push({ id:newId, name, description:"", ownerId:currentUser?.id||"merchant1", active:true, createdAt:Date.now() }); renderMerchantShopsSelector(); currentMerchantSelectedShopId=newId; renderMerchantProductTable(); renderMerchantMetrics(); showToast(`Shop "${name}" created`); renderShopFilters(); renderGrid(); }
+        // Merchant shop creation and product addition
+        function addNewShop(){ let name=prompt("Enter shop name:"); if(!name) return; let city=prompt("Enter city (Nairobi, Mombasa, Kisumu, Nakuru):", "Nairobi"); if(!city) return; let newId="shop"+Date.now(); shops.push({ id:newId, name, city, lat:0, lng:0, description:"", ownerId:currentUser?.id||"merchant1", active:true, createdAt:Date.now() }); renderMerchantShopsSelector(); currentMerchantSelectedShopId=newId; renderMerchantProductTable(); renderMerchantMetrics(); showToast(`Shop "${name}" created`); renderShopFilters(); renderGrid(); }
         function addProductToShop(){ let name=prompt("Product name:"); if(!name) return; let price=parseInt(prompt("Base price (KSh):")); if(isNaN(price)) return; let cat=prompt("Category (water/gas/accessories):", "water"); let newId="p"+Date.now(); products.push({ id:newId, name, category:cat, basePrice:price, rating:4.0, desc:"New product added by merchant", assetType:cat==="water"?"water":cat==="gas"?"gas":"accessory", color:"from-gray-400 to-gray-600", sizeLabel:"", shopId:currentMerchantSelectedShopId }); renderMerchantProductTable(); renderGrid(); showToast(`Product "${name}" added`); }
         function renderShopFilters(){ let container=document.getElementById("shopFilterContainer"); if(!container) return; container.innerHTML = shops.filter(s=>s.active).map(s=>`<button data-shop="${s.id}" class="shop-filter-btn px-4 py-2 text-xs font-semibold rounded-full bg-white dark:bg-slate-800 border shadow-sm hover:bg-brand-50">${escapeHtml(s.name)}</button>`).join(''); document.querySelectorAll(".shop-filter-btn").forEach(btn=>btn.addEventListener("click",()=>{ currentShopFilter=btn.dataset.shop; document.querySelectorAll(".shop-filter-btn").forEach(b=>b.classList.remove("bg-brand-600","text-white")); btn.classList.add("bg-brand-600","text-white"); renderGrid(); })); let allBtn=document.querySelector("[data-shop='all']"); if(allBtn) allBtn.addEventListener("click",()=>{ currentShopFilter="all"; document.querySelectorAll(".shop-filter-btn").forEach(b=>b.classList.remove("bg-brand-600","text-white")); allBtn.classList.add("bg-brand-600","text-white"); renderGrid(); }); }
         
-        // Event binding
+        // Nearby Shops Logic (NEW)
+        function findNearbyShops(clientCity) {
+            if(!clientCity) return [];
+            return shops.filter(shop => shop.city && shop.city.toLowerCase() === clientCity.toLowerCase());
+        }
+        function openNearbyModal() {
+            document.getElementById("nearbyModal").classList.remove("hidden");
+            document.getElementById("locationMsg").innerHTML = "<i class='fas fa-spinner fa-pulse'></i> Waiting for selection...";
+            document.getElementById("nearbyShopsList").innerHTML = '<div class="text-center py-8 text-slate-400">Select a city or use geolocation</div>';
+        }
+        function displayNearbyShops(city) {
+            let nearby = findNearbyShops(city);
+            let listDiv = document.getElementById("nearbyShopsList");
+            let msgSpan = document.getElementById("locationMsg");
+            if(nearby.length === 0) {
+                listDiv.innerHTML = `<div class="text-center py-8 text-slate-400"><i class="fas fa-store-slash text-3xl mb-2 block"></i>No shops found in ${escapeHtml(city)}. Try another city.</div>`;
+                msgSpan.innerHTML = `<i class="fas fa-map-marker-alt text-brand-500"></i> Showing shops near ${escapeHtml(city)}`;
+                return;
+            }
+            listDiv.innerHTML = nearby.map(shop => `
+                <div class="shop-card bg-white dark:bg-slate-800 rounded-xl border p-4 flex justify-between items-center hover:shadow-md transition">
+                    <div><i class="fas fa-store text-brand-500 mr-2"></i><span class="font-bold">${escapeHtml(shop.name)}</span><div class="text-xs text-slate-400 mt-1"><i class="fas fa-location-dot"></i> ${escapeHtml(shop.city)}</div></div>
+                    <button class="view-shop-products-btn bg-brand-600 text-white text-xs px-3 py-1.5 rounded-full" data-shop-id="${shop.id}">View Products</button>
+                </div>
+            `).join('');
+            msgSpan.innerHTML = `<i class="fas fa-check-circle text-emerald-500"></i> ${nearby.length} shop(s) found near ${escapeHtml(city)}`;
+            document.querySelectorAll(".view-shop-products-btn").forEach(btn => btn.addEventListener("click", (e) => {
+                let shopId = btn.dataset.shopId;
+                document.getElementById("nearbyModal").classList.add("hidden");
+                currentShopFilter = shopId;
+                renderGrid();
+                document.querySelectorAll(".shop-filter-btn").forEach(b => b.classList.remove("bg-brand-600","text-white"));
+                let targetBtn = Array.from(document.querySelectorAll(".shop-filter-btn")).find(b => b.dataset.shop === shopId);
+                if(targetBtn) targetBtn.classList.add("bg-brand-600","text-white");
+                showToast(`Showing products from ${escapeHtml(shops.find(s=>s.id===shopId)?.name)}`);
+            }));
+        }
+        function useGeolocation() {
+            if(!navigator.geolocation) {
+                showToast("Geolocation not supported", "exclamation-triangle");
+                return;
+            }
+            document.getElementById("locationMsg").innerHTML = "<i class='fas fa-spinner fa-pulse'></i> Getting your location...";
+            navigator.geolocation.getCurrentPosition(async (position) => {
+                // Simulate city mapping (in production use reverse geocoding)
+                // For demo, we'll just ask user to select city after coords
+                let city = prompt("Based on your coordinates, please select your city from list (Nairobi, Mombasa, Kisumu, Nakuru):", "Nairobi");
+                if(city && ["Nairobi","Mombasa","Kisumu","Nakuru"].includes(city)) {
+                    displayNearbyShops(city);
+                } else {
+                    showToast("Please select a valid city", "times-circle");
+                    document.getElementById("locationMsg").innerHTML = "<i class='fas fa-map-marker-alt'></i> Please select a city from dropdown";
+                }
+            }, () => {
+                showToast("Unable to get location. Please select city manually.", "exclamation-triangle");
+                document.getElementById("locationMsg").innerHTML = "<i class='fas fa-exclamation-triangle'></i> Location access denied. Use dropdown.";
+            });
+        }
+        
+        // Event binding (augmented)
         function bindEvents(){
+            // Reuse existing event bindings (product grid, cart, auth, etc.) from previous version
+            // For brevity, we include essential ones and add nearby modal events
             document.getElementById("productGrid")?.addEventListener("click",(e)=>{ let f=e.target.closest(".fav-action"); if(f){ let id=f.dataset.id; if(favorites.has(id)) favorites.delete(id); else favorites.add(id); saveFavs(); renderGrid(); return; } let add=e.target.closest(".add-grid-cart"); if(add){ let p=products.find(x=>x.id===add.dataset.id); if(p) addToCart(p,0,1); return; } let card=e.target.closest(".product-card"); if(card){ selectedProductId=card.dataset.id; updateDetailPanel(); renderGrid(); } });
             document.getElementById("cartItemsList")?.addEventListener("click",(e)=>{ let rm=e.target.closest(".remove-cart-item"); if(rm){ let id=rm.dataset.id; let step=parseInt(rm.dataset.step); cart=cart.filter(i=>!(i.id===id&&i.modifierStep===step)); saveCart(); showToast("Removed"); } });
             ["searchInput","mobileSearchInput"].forEach(id=>{ let el=document.getElementById(id); if(el) el.addEventListener("input",e=>{ currentSearch=e.target.value; renderGrid(); }); });
@@ -309,6 +314,17 @@
             document.querySelectorAll(".toggle-pwd").forEach(icon=>{ icon.addEventListener("click",(e)=>{ let input=e.target.closest(".relative")?.querySelector("input"); if(input){ input.type=input.type==="password"?"text":"password"; e.target.classList.toggle("fa-eye-slash"); e.target.classList.toggle("fa-eye"); } }); });
             document.getElementById("authLoginTab")?.addEventListener("click",()=>{ document.getElementById("authLoginForm").classList.remove("hidden"); document.getElementById("authSignupForm").classList.add("hidden"); document.getElementById("authLoginTab").className="pb-2 font-black text-brand-600 border-b-2 border-brand-600"; document.getElementById("authSignupTab").className="pb-2 font-semibold text-slate-400"; });
             document.getElementById("authSignupTab")?.addEventListener("click",()=>{ document.getElementById("authSignupForm").classList.remove("hidden"); document.getElementById("authLoginForm").classList.add("hidden"); document.getElementById("authSignupTab").className="pb-2 font-black text-brand-600 border-b-2 border-brand-600"; document.getElementById("authLoginTab").className="pb-2 font-semibold text-slate-400"; });
+            
+            // Nearby Shops events
+            document.getElementById("nearbyShopsBtn")?.addEventListener("click", openNearbyModal);
+            document.getElementById("mobileNearbyBtn")?.addEventListener("click", openNearbyModal);
+            document.getElementById("closeNearbyModal")?.addEventListener("click", () => document.getElementById("nearbyModal").classList.add("hidden"));
+            document.getElementById("useGeolocationBtn")?.addEventListener("click", useGeolocation);
+            document.getElementById("manualCityApplyBtn")?.addEventListener("click", () => {
+                let city = document.getElementById("manualCitySelect").value;
+                if(city) displayNearbyShops(city);
+                else showToast("Please select a city", "info-circle");
+            });
         }
         
         function init(){ loadCartAndFavs(); let sess=safeParseJSON(localStorage.getItem("maji_session"),null); if(sess?.user){ let users=getUsers(); let found=users.find(u=>u.id===sess.user.id); if(found) currentUser=found; else localStorage.removeItem("maji_session"); } updateAuthUI(); renderGrid(); updateDetailPanel(); updateCartUI(); renderShopFilters(); bindEvents(); if(currentUser&&currentUser.role==="merchant") renderMerchantShopsSelector(); }
