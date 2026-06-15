@@ -18,21 +18,11 @@
                             600: '#0d9488',
                             700: '#0f5c54',
                             DEFAULT: '#0d9488'
-                        },
-                        glass: {
-                            light: 'rgba(255,255,255,0.75)',
-                            dark: 'rgba(15,23,42,0.85)'
                         }
                     },
                     fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] },
-                    animation: {
-                        'float': 'float 6s ease-in-out infinite',
-                        'pulse-glow': 'pulseGlow 2s ease-in-out infinite',
-                    },
-                    keyframes: {
-                        float: { '0%, 100%': { transform: 'translateY(0px)' }, '50%': { transform: 'translateY(-8px)' } },
-                        pulseGlow: { '0%, 100%': { boxShadow: '0 0 5px rgba(13,148,136,0.3)' }, '50%': { boxShadow: '0 0 20px rgba(13,148,136,0.6)' } }
-                    },
+                    animation: { 'float': 'float 6s ease-in-out infinite' },
+                    keyframes: { float: { '0%, 100%': { transform: 'translateY(0px)' }, '50%': { transform: 'translateY(-8px)' } } },
                     backdropBlur: { xs: '2px' }
                 }
             }
@@ -41,90 +31,33 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        * {
-            -webkit-tap-highlight-color: transparent;
-        }
-        body {
-            font-feature-settings: "cv02", "cv03", "cv04", "cv11";
-        }
+        * { -webkit-tap-highlight-color: transparent; }
+        body { font-feature-settings: "cv02", "cv03", "cv04", "cv11"; }
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-        
-        /* custom slider styling */
         input[type="range"] {
             -webkit-appearance: none;
             background: linear-gradient(90deg, #0d9488 0%, #0d9488 var(--fill-percent, 0%), #e2e8f0 var(--fill-percent, 0%));
             height: 6px;
             border-radius: 9999px;
         }
-        .dark input[type="range"] {
-            background: linear-gradient(90deg, #14b8a6 0%, #14b8a6 var(--fill-percent, 0%), #334155 var(--fill-percent, 0%));
-        }
-        input[type="range"]::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            width: 22px;
-            height: 22px;
-            background: white;
-            border-radius: 50%;
-            box-shadow: 0 6px 14px rgba(0,0,0,0.15);
-            border: 2px solid #0d9488;
-            cursor: pointer;
-            transition: transform 0.1s ease;
-        }
+        .dark input[type="range"] { background: linear-gradient(90deg, #14b8a6 0%, #14b8a6 var(--fill-percent, 0%), #334155 var(--fill-percent, 0%)); }
+        input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 22px; height: 22px; background: white; border-radius: 50%; box-shadow: 0 6px 14px rgba(0,0,0,0.15); border: 2px solid #0d9488; cursor: pointer; transition: transform 0.1s ease; }
         input[type="range"]::-webkit-slider-thumb:hover { transform: scale(1.2); }
-        
-        /* glass morphism enhancements */
-        .glass-card {
-            background: rgba(255, 255, 255, 0.7);
-            backdrop-filter: blur(16px);
-            border: 1px solid rgba(255,255,255,0.3);
-        }
-        .dark .glass-card {
-            background: rgba(15, 23, 42, 0.7);
-            border-color: rgba(255,255,255,0.05);
-        }
-        .product-card {
-            transition: all 0.3s cubic-bezier(0.2, 0, 0, 1);
-        }
-        .product-card:hover {
-            transform: translateY(-6px);
-            box-shadow: 0 24px 36px -12px rgba(0, 0, 0, 0.2);
-        }
-        .smooth-transition {
-            transition: all 0.2s ease;
-        }
-        button:active {
-            transform: scale(0.96);
-        }
-        @keyframes slideUp {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        .animate-slide-up {
-            animation: slideUp 0.4s ease-out;
-        }
-        .glass-drawer {
-            background: rgba(255, 255, 255, 0.98);
-            backdrop-filter: blur(20px);
-        }
-        .dark .glass-drawer {
-            background: rgba(15, 23, 42, 0.98);
-        }
-        .toast-animate {
-            transition: opacity 0.25s, transform 0.25s;
-        }
-        .hover-lift {
-            transition: transform 0.2s, box-shadow 0.2s;
-        }
-        .hover-lift:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 20px 30px -12px rgba(0,0,0,0.2);
-        }
+        .glass-card { background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(16px); border: 1px solid rgba(255,255,255,0.3); }
+        .dark .glass-card { background: rgba(15, 23, 42, 0.7); border-color: rgba(255,255,255,0.05); }
+        .product-card { transition: all 0.3s cubic-bezier(0.2, 0, 0, 1); }
+        .product-card:hover { transform: translateY(-6px); box-shadow: 0 24px 36px -12px rgba(0, 0, 0, 0.2); }
+        button:active { transform: scale(0.96); }
+        .animate-slide-up { animation: slideUp 0.4s ease-out; }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .glass-drawer { background: rgba(255, 255, 255, 0.98); backdrop-filter: blur(20px); }
+        .dark .glass-drawer { background: rgba(15, 23, 42, 0.98); }
     </style>
 </head>
 <body class="bg-gradient-to-br from-slate-50 via-white to-slate-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 text-slate-800 dark:text-slate-100 min-h-screen pb-20 md:pb-0 transition-colors duration-300 antialiased">
 
-    <!-- Premium Header with Glassmorphism -->
+    <!-- Header with Glassmorphism -->
     <header class="sticky top-0 z-40 w-full border-b border-white/30 dark:border-slate-800/50 bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl shadow-sm transition-all">
         <div class="max-w-7xl mx-auto px-5 lg:px-8 h-16 flex items-center justify-between gap-4">
             <div class="flex items-center gap-3">
@@ -157,7 +90,6 @@
     <main class="max-w-7xl mx-auto px-5 lg:px-8 w-full py-6 flex-1">
         <!-- Client Workspace View -->
         <div id="clientTenantView" class="w-full flex flex-col gap-7 animate-slide-up">
-            <!-- Enhanced Category Pills -->
             <div class="flex items-center justify-between gap-4 overflow-x-auto pb-2 no-scrollbar">
                 <div class="flex gap-2 bg-white/40 dark:bg-slate-800/30 p-1.5 rounded-2xl backdrop-blur-sm border border-white/50 dark:border-slate-700/50">
                     <button data-cat="all" class="cat-btn px-5 py-2 text-xs font-black rounded-xl transition-all shadow-sm bg-brand-600 text-white">All Assets</button>
@@ -168,14 +100,10 @@
                 <button id="saasSubLinkBtn" class="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-amber-500 to-orange-500 text-white text-xs font-black rounded-2xl shadow-lg hover:shadow-xl transition-all whitespace-nowrap"><i class="fas fa-crown"></i> Enterprise Plans</button>
             </div>
 
-            <!-- Main Split Layout -->
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-7 items-start">
-                <!-- Product Grid (Left) -->
                 <div class="lg:col-span-7 xl:col-span-8">
                     <div id="productGrid" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5"></div>
                 </div>
-
-                <!-- Premium Detail Panel (Right) - Glassmorphic Card -->
                 <aside class="lg:col-span-5 xl:col-span-4 bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl rounded-3xl border border-white/50 dark:border-slate-700/70 shadow-2xl overflow-hidden sticky top-24 transition-all hover:shadow-brand-500/10">
                     <div class="p-6 space-y-5">
                         <div id="heroVisualContainer" class="flex justify-center py-6 bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 rounded-2xl border border-slate-200/60 dark:border-slate-700/40 shadow-inner"></div>
@@ -188,14 +116,11 @@
                             </div>
                         </div>
                         <p id="detailDesc" class="text-slate-500 dark:text-slate-400 text-sm leading-relaxed"></p>
-                        
-                        <!-- Modifier section with dynamic slider -->
                         <div class="bg-slate-50/80 dark:bg-slate-900/60 p-5 rounded-2xl border border-slate-100 dark:border-slate-700/50 space-y-3">
                             <div class="flex justify-between items-center"><span class="text-xs font-black uppercase tracking-wider text-slate-500 dark:text-slate-400">Configuration Matrix</span><span id="sliderStepLabel" class="text-xs font-extrabold text-brand-600 bg-white dark:bg-slate-800 px-3 py-1.5 rounded-full shadow-sm border">Standard Tier</span></div>
                             <input type="range" id="modifierSlider" min="0" max="2" value="0" step="1" class="w-full accent-brand-500" style="--fill-percent: 0%;">
                             <div class="flex justify-between text-[10px] font-bold text-slate-400 uppercase tracking-tight px-1"><span>Core</span><span>Advanced</span><span>Industrial+</span></div>
                         </div>
-
                         <div class="flex items-center justify-between gap-4 pt-2">
                             <div><span class="text-[11px] font-black text-slate-400 uppercase tracking-wider">Total Settlement</span><div class="text-3xl font-black text-slate-900 dark:text-white" id="totalPriceDisplay">KSh 0</div></div>
                             <div class="flex items-center bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-1.5 gap-4 shadow-sm"><button id="decrementQty" class="w-9 h-9 rounded-xl bg-white dark:bg-slate-800 text-slate-800 dark:text-white shadow-sm flex items-center justify-center font-bold text-lg hover:bg-brand-50 transition-all">−</button><span id="quantityValue" class="font-black text-lg w-6 text-center">1</span><button id="incrementQty" class="w-9 h-9 rounded-xl bg-brand-600 text-white shadow-md flex items-center justify-center font-bold text-lg hover:bg-brand-700 transition-all">+</button></div>
@@ -206,7 +131,7 @@
             </div>
         </div>
 
-        <!-- Merchant Workspace (Hidden by default) -->
+        <!-- Merchant Workspace -->
         <div id="merchantTenantView" class="w-full hidden space-y-8 animate-slide-up">
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
                 <div class="bg-white/70 dark:bg-slate-800/70 backdrop-blur-md border border-slate-200 dark:border-slate-700 p-5 rounded-2xl shadow-lg"><div><p class="text-xs font-bold text-slate-400">Gross MRR</p><h3 class="text-2xl font-black mt-1">KSh 142,500</h3><span class="text-emerald-500 text-xs"><i class="fas fa-arrow-up"></i> +12.4%</span></div><i class="fas fa-chart-line text-2xl text-brand-500 float-right"></i></div>
@@ -219,11 +144,11 @@
         </div>
     </main>
 
-    <!-- Cart Drawer etc (condensed, but full functional) -->
+    <!-- Cart Drawer -->
     <div id="cartDrawer" class="fixed top-0 right-0 h-full w-full max-w-md glass-drawer shadow-2xl transform translate-x-full transition-transform duration-300 z-50 flex flex-col border-l border-slate-200 dark:border-slate-800"><div class="flex justify-between p-5 border-b"><h2 class="text-xl font-black">Active Cart</h2><button id="closeCartBtn"><i class="fas fa-times text-slate-400 text-xl"></i></button></div><div id="cartItemsList" class="flex-1 overflow-y-auto p-4 space-y-3"></div><div class="p-5 border-t space-y-4"><div class="flex justify-between font-black text-lg"><span>Total</span><span id="cartTotalAmount">KSh 0</span></div><button id="cartCheckoutBtn" class="w-full bg-emerald-600 py-3.5 rounded-xl font-bold shadow-lg">Proceed to M-PESA</button></div></div>
     <div id="drawerOverlay" class="fixed inset-0 bg-black/40 backdrop-blur-sm hidden z-45"></div>
 
-    <!-- Modals (Auth, Payment, Orders, Subscription) - same robust logic -->
+    <!-- Modals -->
     <div id="authModal" class="fixed inset-0 bg-black/50 backdrop-blur-md flex items-center justify-center z-50 hidden"><div class="bg-white dark:bg-slate-800 rounded-3xl max-w-md w-full p-6 shadow-2xl"><button id="closeAuthModal" class="float-right text-slate-400"><i class="fas fa-times"></i></button><div class="flex gap-4 border-b mb-5"><button id="authLoginTab" class="pb-2 font-black text-brand-600 border-b-2 border-brand-600">Login</button><button id="authSignupTab" class="pb-2 font-semibold text-slate-400">Sign Up</button></div><div id="authLoginForm" class="space-y-4"><input type="text" id="loginEmailPhone" placeholder="Email / Phone" class="w-full p-3 border rounded-xl"><div class="relative"><input type="password" id="loginPassword" placeholder="Password" class="w-full p-3 border rounded-xl"><i class="fas fa-eye-slash toggle-pwd absolute right-3 top-4 cursor-pointer"></i></div><button id="doLoginBtn" class="w-full bg-brand-600 text-white p-3 rounded-xl font-bold">Secure Login</button><button id="guestCheckoutBtnFromAuth" class="text-center w-full text-sm text-brand-500">Continue as Guest</button></div><div id="authSignupForm" class="space-y-4 hidden"><input type="text" id="signupName" placeholder="Full Name" class="w-full p-3 border rounded-xl"><input type="email" id="signupEmail" placeholder="Email" class="w-full p-3 border rounded-xl"><input type="tel" id="signupPhone" placeholder="0712345678" class="w-full p-3 border rounded-xl"><input type="password" id="signupPassword" placeholder="Password" class="w-full p-3 border rounded-xl"><input type="password" id="signupConfirmPwd" placeholder="Confirm" class="w-full p-3 border rounded-xl"><button id="doSignupBtn" class="w-full bg-emerald-600 text-white p-3 rounded-xl font-bold">Create Account</button></div></div></div>
     <div id="paymentModal" class="fixed inset-0 bg-black/60 backdrop-blur-md flex items-center justify-center z-50 hidden"><div class="bg-white dark:bg-slate-800 rounded-3xl max-w-md w-full p-6"><div id="paymentPhoneStep"><h3 class="font-black text-xl">M-PESA STK Push</h3><div class="my-3 p-3 bg-slate-100 rounded-xl">Total: <span id="paymentOrderAmount" class="font-black">KSh 0</span></div><input type="tel" id="mpesaPhoneInput" placeholder="Safaricom Number" class="w-full p-3 border rounded-xl"><button id="initiatePaymentBtn" class="w-full bg-emerald-600 text-white p-3 rounded-xl font-bold mt-4">Request Payment</button><button id="cancelPaymentBtn" class="w-full text-sm mt-2">Cancel</button></div><div id="paymentWaitingStep" class="hidden text-center"><i class="fas fa-spinner fa-pulse text-3xl text-brand-500"></i><p class="mt-2">Awaiting PIN entry...</p><div class="w-full h-1 bg-slate-200 rounded-full mt-3"><div id="paymentProgressBar" class="h-full bg-brand-500 w-0 transition-all duration-[30s]"></div></div></div><div id="paymentResultStep" class="hidden text-center"></div></div></div>
     <div id="ordersModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 hidden"><div class="bg-white dark:bg-slate-800 rounded-3xl max-w-2xl w-full max-h-[80vh] overflow-auto p-6"><div class="flex justify-between"><h2 class="text-2xl font-black">Order Ledger</h2><button id="closeOrdersModal"><i class="fas fa-times"></i></button></div><div id="ordersListContainer" class="space-y-3 mt-4"></div></div></div>
@@ -231,22 +156,27 @@
     <div id="toast" class="fixed bottom-24 left-1/2 -translate-x-1/2 bg-slate-900 dark:bg-white text-white dark:text-slate-900 px-5 py-3 rounded-full shadow-2xl flex items-center gap-2 opacity-0 pointer-events-none transition-all duration-300 z-50 text-xs font-bold"><i class="fas fa-check-circle text-emerald-400"></i><span id="toastMsg"></span></div>
 
     <script>
-        // complete robust engine (identical to full spec but refined UI/UX)
-        const products = [{ id:"p1", name:"20L Pure Water Refill", category:"water", basePrice:350, rating:4.9, desc:"Premium ultra-filtered drinking water. BPA-free container, double sealed.", assetType:"water", color:"from-cyan-400 to-cyan-600", sizeLabel:"20L"},{ id:"p2", name:"6kg Gas Cylinder", category:"gas", basePrice:1250, rating:4.7, desc:"Portable LPG canister with certified safety valve.", assetType:"gas", color:"from-emerald-400 to-emerald-600", sizeLabel:"6KG"},{ id:"p3", name:"13kg Gas Cylinder Refill", category:"gas", basePrice:1540, rating:4.8, desc:"Household LPG refill. KEBS approved.", assetType:"gas", color:"from-teal-400 to-teal-600", sizeLabel:"13KG"},{ id:"p4", name:"Brass Gas Regulator", category:"accessories", basePrice:850, rating:4.5, desc:"Auto-shutoff regulator, prevents leaks.", assetType:"accessory", color:"from-amber-400 to-amber-600", sizeLabel:""}];
+        // Product data and global state
+        const products = [
+            { id:"p1", name:"20L Pure Water Refill", category:"water", basePrice:350, rating:4.9, desc:"Premium ultra-filtered drinking water. BPA-free container, double sealed.", assetType:"water", color:"from-cyan-400 to-cyan-600", sizeLabel:"20L" },
+            { id:"p2", name:"6kg Gas Cylinder", category:"gas", basePrice:1250, rating:4.7, desc:"Portable LPG canister with certified safety valve.", assetType:"gas", color:"from-emerald-400 to-emerald-600", sizeLabel:"6KG" },
+            { id:"p3", name:"13kg Gas Cylinder Refill", category:"gas", basePrice:1540, rating:4.8, desc:"Household LPG refill. KEBS approved.", assetType:"gas", color:"from-teal-400 to-teal-600", sizeLabel:"13KG" },
+            { id:"p4", name:"Brass Gas Regulator", category:"accessories", basePrice:850, rating:4.5, desc:"Auto-shutoff regulator, prevents leaks.", assetType:"accessory", color:"from-amber-400 to-amber-600", sizeLabel:"" }
+        ];
         const modifierMap = { water:[{label:"Standard Cap",premium:0},{label:"Silicone Pump",premium:150},{label:"Deluxe Spigot",premium:350}], gas:[{label:"Standard Valve",premium:0},{label:"Threaded Premium",premium:200},{label:"Industrial Gauge",premium:450}], accessories:[{label:"Basic Fittings",premium:0},{label:"Reinforced Hose",premium:100},{label:"Full Kit",premium:250}] };
         let currentCategory="all", currentSearch="", selectedProductId="p3", currentQuantity=1, currentModifierStep=0, activeTenantSpace="client", cart=[], favorites=new Set(), currentUser=null, activePaymentTimer=null;
         function safeParseJSON(s,f=[]){try{return JSON.parse(s)}catch(e){return f}}function getUserKey(){return `maji_${currentUser?.id||'guest'}`}
         function saveCart(){localStorage.setItem(getUserKey()+'_cart',JSON.stringify(cart));updateCartUI()}function saveFavs(){localStorage.setItem(getUserKey()+'_favorites',JSON.stringify([...favorites]))}
         function loadCartAndFavs(){cart=safeParseJSON(localStorage.getItem(getUserKey()+'_cart'),[]);favorites=new Set(safeParseJSON(localStorage.getItem(getUserKey()+'_favorites'),[]));}
         function showToast(msg,icon="check-circle"){let t=document.getElementById("toast");document.getElementById("toastMsg").innerHTML=`<i class="fas fa-${icon} mr-2"></i>${msg}`;t.classList.remove("opacity-0","pointer-events-none");t.classList.add("opacity-100");setTimeout(()=>{t.classList.remove("opacity-100");t.classList.add("opacity-0","pointer-events-none")},2500);}
-        function updateCartUI(){let cnt=cart.reduce((s,i)=>s+i.quantity,0);document.getElementById("cartCountBadge").innerText=cnt;document.getElementById("mobileCartBadge")&&(document.getElementById("mobileCartBadge").innerText=cnt);renderCartDrawer();}
+        function updateCartUI(){let cnt=cart.reduce((s,i)=>s+i.quantity,0);document.getElementById("cartCountBadge").innerText=cnt;renderCartDrawer();}
         function renderCartDrawer(){let c=document.getElementById("cartItemsList");if(!c)return;if(cart.length===0){c.innerHTML='<div class="text-center text-slate-400 py-12 text-xs">Cart is empty</div>';document.getElementById("cartTotalAmount").innerText="KSh 0";return;}let total=0;c.innerHTML=cart.map(i=>{total+=i.price*i.quantity;return `<div class="flex justify-between items-center p-3 bg-slate-50 dark:bg-slate-900 rounded-xl"><div><p class="font-bold text-sm">${escapeHtml(i.name)}</p><p class="text-[10px] text-slate-400">${escapeHtml(i.modifierLabel)} • KSh ${i.price}</p></div><div class="flex items-center gap-3"><span class="font-black">KSh ${(i.price*i.quantity).toLocaleString()}</span><button class="remove-cart-item text-rose-500" data-id="${i.id}" data-step="${i.modifierStep}"><i class="fas fa-trash-alt"></i></button></div></div>`}).join("");document.getElementById("cartTotalAmount").innerHTML=`KSh ${total.toLocaleString()}`;}
         function escapeHtml(s){return s.replace(/[&<>]/g,function(m){if(m==='&')return'&amp;';if(m==='<')return'&lt;';if(m==='>')return'&gt;';return m;});}
         function addToCart(p,modStep,qty){let list=modifierMap[p.category]||modifierMap.accessories;let mod=list[modStep];let price=p.basePrice+(mod?.premium||0);let idx=cart.findIndex(i=>i.id===p.id&&i.modifierStep===modStep);if(idx!==-1)cart[idx].quantity+=qty;else cart.push({id:p.id,name:p.name,price,quantity:qty,modifierStep:modStep,modifierLabel:mod.label});saveCart();showToast(`${p.name} added to cart`);}
         function renderGrid(){let filtered=products.filter(p=>(currentCategory==="all"||p.category===currentCategory)&&p.name.toLowerCase().includes(currentSearch.toLowerCase()));let grid=document.getElementById("productGrid");if(filtered.length===0){grid.innerHTML='<div class="col-span-full text-center py-20 text-slate-400 text-sm">No matching assets</div>';return;}grid.innerHTML=filtered.map(p=>{let isFav=favorites.has(p.id);let assetHtml=p.assetType==="water"?`<div class="w-12 h-20 bg-gradient-to-br ${p.color} rounded-xl flex flex-col items-center justify-center shadow-md"><span class="text-white font-black text-xs">${p.sizeLabel}</span></div>`:p.assetType==="gas"?`<div class="w-12 h-20 bg-gradient-to-br ${p.color} rounded-2xl flex items-center justify-center"><span class="text-white font-black text-xs">${p.sizeLabel}</span></div>`:`<div class="w-14 h-14 bg-gradient-to-br ${p.color} rounded-full flex items-center justify-center"><i class="fas fa-cog text-white text-xl"></i></div>`;return `<div class="product-card bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm rounded-2xl border p-4 cursor-pointer transition-all ${selectedProductId===p.id?'ring-2 ring-brand-500 shadow-xl':''}" data-id="${p.id}"><div class="flex justify-between"><button class="fav-action text-${isFav?'rose-500':'slate-300'} text-sm" data-id="${p.id}"><i class="fas fa-heart"></i></button><span class="text-[10px] font-mono">★ ${p.rating}</span></div><div class="flex justify-center my-3">${assetHtml}</div><h3 class="font-bold text-sm">${p.name}</h3><div class="flex justify-between mt-2 items-center"><span class="font-black text-brand-600">KSh ${p.basePrice}</span><button class="add-grid-cart bg-slate-100 dark:bg-slate-700 px-3 py-1.5 rounded-xl text-xs font-bold" data-id="${p.id}">+ Add</button></div></div>`}).join("");}
         function updateDetailPanel(){let p=products.find(p=>p.id===selectedProductId);if(!p)return;document.getElementById("detailTitle").innerText=p.name;document.getElementById("detailRating").innerText=p.rating.toFixed(1);document.getElementById("detailDesc").innerText=p.desc;let hero=document.getElementById("heroVisualContainer");hero.innerHTML=p.assetType==="water"?`<div class="w-28 h-36 bg-gradient-to-br ${p.color} rounded-3xl flex items-center justify-center shadow-2xl border-4 border-white"><span class="text-white font-black text-lg">${p.sizeLabel}</span></div>`:p.assetType==="gas"?`<div class="w-28 h-36 bg-gradient-to-br ${p.color} rounded-3xl flex items-center justify-center shadow-2xl"><span class="text-white font-black text-lg">${p.sizeLabel}</span></div>`:`<div class="w-28 h-28 bg-gradient-to-br ${p.color} rounded-2xl flex items-center justify-center shadow-2xl"><i class="fas fa-microchip text-white text-4xl"></i></div>`;let list=modifierMap[p.category]||modifierMap.accessories;currentModifierStep=0;document.getElementById("modifierSlider").value=0;document.getElementById("sliderStepLabel").innerText=list[0].label;currentQuantity=1;document.getElementById("quantityValue").innerText=1;computeTotalPrice();}
         function computeTotalPrice(){let p=products.find(p=>p.id===selectedProductId);let cost=((modifierMap[p.category]||modifierMap.accessories)[currentModifierStep]?.premium||0);let total=(p.basePrice+cost)*currentQuantity;document.getElementById("totalPriceDisplay").innerText=`KSh ${total.toLocaleString()}`;}
-        // auth & orders logic minimal but robust
+        // Auth helpers
         function normalizePhone(p){let c=p.replace(/\s/g,'').replace(/^\+?254/,'');if(c.startsWith('0'))c=c.slice(1);if(c.length===9&&/^[17]\d{8}$/.test(c))return '254'+c;if(c.length===12&&/^254[17]\d{8}$/.test(c))return c;return null;}
         function getUsers(){return safeParseJSON(localStorage.getItem("maji_users"),[]);}function saveUsers(u){localStorage.setItem("maji_users",JSON.stringify(u));}
         function persistSession(user){localStorage.setItem("maji_session",JSON.stringify({user}));currentUser=user;loadCartAndFavs();updateAuthUI();renderGrid();updateCartUI();}
@@ -260,9 +190,41 @@
         async function checkoutFlow(){if(cart.length===0)return;let total=cart.reduce((s,i)=>s+i.price*i.quantity,0);document.getElementById("paymentOrderAmount").innerText=`KSh ${total.toLocaleString()}`;document.getElementById("mpesaPhoneInput").value=currentUser?.phone||"";document.getElementById("paymentModal").classList.remove("hidden");let initBtn=document.getElementById("initiatePaymentBtn");initBtn.onclick=()=>{let phone=normalizePhone(document.getElementById("mpesaPhoneInput").value);if(!phone){showToast("Valid Safaricom number required");return;}document.getElementById("paymentPhoneStep").classList.add("hidden");document.getElementById("paymentWaitingStep").classList.remove("hidden");let prog=document.getElementById("paymentProgressBar");prog.style.width="0%";setTimeout(()=>prog.style.width="100%",50);activePaymentTimer=setTimeout(()=>{safeClosePaymentModal();showToast("Payment timeout")},30000);setTimeout(()=>{if(activePaymentTimer){clearTimeout(activePaymentTimer);activePaymentTimer=null;document.getElementById("paymentWaitingStep").classList.add("hidden");document.getElementById("paymentResultStep").classList.remove("hidden");document.getElementById("paymentResultStep").innerHTML=`<div class="text-center"><i class="fas fa-check-circle text-5xl text-emerald-500"></i><p class="font-bold mt-2">Payment Success!</p><button id="closePaySuccess" class="mt-3 bg-brand-500 px-4 py-2 rounded-xl">Close</button></div>`;document.getElementById("closePaySuccess")?.addEventListener("click",()=>{let orderId="ORD-"+Date.now();saveOrderToUser({orderId,timestamp:Date.now(),amount:total,itemsCount:cart.length,phone,status:"Paid"});cart=[];saveCart();updateCartUI();safeClosePaymentModal();showToast(`Order ${orderId} placed!`);});}},2500);};}
         function safeClosePaymentModal(){if(activePaymentTimer)clearTimeout(activePaymentTimer);document.getElementById("paymentModal").classList.add("hidden");document.getElementById("paymentPhoneStep").classList.remove("hidden");document.getElementById("paymentWaitingStep").classList.add("hidden");document.getElementById("paymentResultStep").classList.add("hidden");document.getElementById("paymentResultStep").innerHTML="";}
         function initAuth(){let sess=safeParseJSON(localStorage.getItem("maji_session"),null);if(sess?.user){let users=getUsers();let found=users.find(u=>u.id===sess.user.id);if(found)currentUser=found;else localStorage.removeItem("maji_session");}loadCartAndFavs();updateAuthUI();}
-        function bindEvents(){document.getElementById("productGrid")?.addEventListener("click",(e)=>{let f=e.target.closest(".fav-action");if(f){let id=f.dataset.id;if(favorites.has(id))favorites.delete(id);else favorites.add(id);saveFavs();renderGrid();return;}let add=e.target.closest(".add-grid-cart");if(add){let p=products.find(x=>x.id===add.dataset.id);if(p)addToCart(p,0,1);return;}let card=e.target.closest(".product-card");if(card){selectedProductId=card.dataset.id;updateDetailPanel();renderGrid();}});document.getElementById("cartItemsList")?.addEventListener("click",(e)=>{let rm=e.target.closest(".remove-cart-item");if(rm){let id=rm.dataset.id,step=parseInt(rm.dataset.step);cart=cart.filter(i=>!(i.id===id&&i.modifierStep===step));saveCart();updateCartUI();showToast("Removed");}});["searchInput","mobileSearchInput"].forEach(id=>{let el=document.getElementById(id);if(el)el.addEventListener("input",e=>{currentSearch=e.target.value;renderGrid();})});document.querySelectorAll(".cat-btn").forEach(btn=>btn.addEventListener("click",()=>{currentCategory=btn.dataset.cat;document.querySelectorAll(".cat-btn").forEach(b=>b.classList.remove("bg-brand-600","text-white"));btn.classList.add("bg-brand-600","text-white");renderGrid();}));let slider=document.getElementById("modifierSlider");slider?.addEventListener("input",(e)=>{currentModifierStep=parseInt(e.target.value);let p=products.find(p=>p.id===selectedProductId);if(p){let list=modifierMap[p.category]||modifierMap.accessories;document.getElementById("sliderStepLabel").innerText=list[currentModifierStep].label;computeTotalPrice();}});document.getElementById("incrementQty")?.addEventListener("click",()=>{if(currentQuantity<10){currentQuantity++;document.getElementById("quantityValue").innerText=currentQuantity;computeTotalPrice();}});document.getElementById("decrementQty")?.addEventListener("click",()=>{if(currentQuantity>1){currentQuantity--;document.getElementById("quantityValue").innerText=currentQuantity;computeTotalPrice();}});document.getElementById("addToCartFromDetail")?.addEventListener("click",()=>{let p=products.find(p=>p.id===selectedProductId);addToCart(p,currentModifierStep,currentQuantity);});document.getElementById("checkoutNowBtn")?.addEventListener("click",checkoutFlow);document.getElementById("cartCheckoutBtn")?.addEventListener("click",checkoutFlow);document.getElementById("cartIconBtn")?.addEventListener("click",()=>{document.getElementById("cartDrawer").classList.remove("translate-x-full");document.getElementById("drawerOverlay").classList.remove("hidden");});document.getElementById("closeCartBtn")?.addEventListener("click",()=>{document.getElementById("cartDrawer").classList.add("translate-x-full");document.getElementById("drawerOverlay").classList.add("hidden");});document.getElementById("drawerOverlay")?.addEventListener("click",()=>{document.getElementById("cartDrawer").classList.add("translate-x-full");document.getElementById("drawerOverlay").classList.add("hidden");});document.getElementById("favoritesBtn")?.addEventListener("click",()=>showToast(`❤️ ${favorites.size} favorites`));document.getElementById("ordersHistoryBtn")?.addEventListener("click",openOrdersModal);document.getElementById("closeOrdersModal")?.addEventListener("click",()=>document.getElementById("ordersModal").classList.add("hidden"));document.getElementById("userProfileBtn")?.addEventListener("click",(e)=>{e.stopPropagation();document.getElementById("userDropdown").classList.toggle("hidden");});document.addEventListener("click",(e)=>{if(!document.getElementById("userMenuContainer")?.contains(e.target))document.getElementById("userDropdown")?.classList.add("hidden");});document.getElementById("closeAuthModal")?.addEventListener("click",()=>document.getElementById("authModal").classList.add("hidden"));document.getElementById("doLoginBtn")?.addEventListener("click",doLogin);document.getElementById("doSignupBtn")?.addEventListener("click",doSignup);document.getElementById("guestCheckoutBtnFromAuth")?.addEventListener("click",()=>{document.getElementById("authModal").classList.add("hidden");checkoutFlow();});document.getElementById("cancelPaymentBtn")?.addEventListener("click",safeClosePaymentModal);document.getElementById("tenantSwitchBtn")?.addEventListener("click",()=>{let client=document.getElementById("clientTenantView"),merchant=document.getElementById("merchantTenantView");activeTenantSpace=activeTenantSpace==="client"?"merchant":"client";if(activeTenantSpace==="merchant"){client.classList.add("hidden");merchant.classList.remove("hidden");}else{merchant.classList.add("hidden");client.classList.remove("hidden");}});document.getElementById("saasSubLinkBtn")?.addEventListener("click",()=>{let grid=document.getElementById("subscriptionTierTargetGrid");grid.innerHTML=`<div class="bg-white p-4 rounded-xl"><h3>Demo Tier</h3><button onclick="showToast('Demo subscription')">Subscribe</button></div>`;document.getElementById("subscriptionModal").classList.remove("hidden");});document.getElementById("closeSubscriptionModal")?.addEventListener("click",()=>document.getElementById("subscriptionModal").classList.add("hidden"));document.getElementById("themeToggleBtn")?.addEventListener("click",()=>document.documentElement.classList.toggle("dark"));document.getElementById("addNewProductMockBtn")?.addEventListener("click",()=>showToast("Asset catalog extended"));}
         function closeAuthModal(){document.getElementById("authModal").classList.add("hidden");}
-        window.closeAuthModal=closeAuthModal;function init(){initAuth();renderGrid();updateDetailPanel();updateCartUI();bindEvents();}init();
+        // Full event binding to ensure all buttons work
+        function bindAllEvents(){
+            document.getElementById("productGrid")?.addEventListener("click",(e)=>{let f=e.target.closest(".fav-action");if(f){let id=f.dataset.id;if(favorites.has(id))favorites.delete(id);else favorites.add(id);saveFavs();renderGrid();showToast(favorites.has(id)?"Added to favorites":"Removed from favorites");return;}let add=e.target.closest(".add-grid-cart");if(add){let p=products.find(x=>x.id===add.dataset.id);if(p)addToCart(p,0,1);return;}let card=e.target.closest(".product-card");if(card){selectedProductId=card.dataset.id;updateDetailPanel();renderGrid();}});
+            document.getElementById("cartItemsList")?.addEventListener("click",(e)=>{let rm=e.target.closest(".remove-cart-item");if(rm){let id=rm.dataset.id,step=parseInt(rm.dataset.step);cart=cart.filter(i=>!(i.id===id&&i.modifierStep===step));saveCart();updateCartUI();showToast("Removed");}});
+            ["searchInput","mobileSearchInput"].forEach(id=>{let el=document.getElementById(id);if(el)el.addEventListener("input",e=>{currentSearch=e.target.value;renderGrid();})});
+            document.querySelectorAll(".cat-btn").forEach(btn=>btn.addEventListener("click",()=>{currentCategory=btn.dataset.cat;document.querySelectorAll(".cat-btn").forEach(b=>b.classList.remove("bg-brand-600","text-white"));btn.classList.add("bg-brand-600","text-white");renderGrid();}));
+            let slider=document.getElementById("modifierSlider");slider?.addEventListener("input",(e)=>{currentModifierStep=parseInt(e.target.value);let p=products.find(p=>p.id===selectedProductId);if(p){let list=modifierMap[p.category]||modifierMap.accessories;document.getElementById("sliderStepLabel").innerText=list[currentModifierStep].label;computeTotalPrice();}});
+            document.getElementById("incrementQty")?.addEventListener("click",()=>{if(currentQuantity<10){currentQuantity++;document.getElementById("quantityValue").innerText=currentQuantity;computeTotalPrice();}});
+            document.getElementById("decrementQty")?.addEventListener("click",()=>{if(currentQuantity>1){currentQuantity--;document.getElementById("quantityValue").innerText=currentQuantity;computeTotalPrice();}});
+            document.getElementById("addToCartFromDetail")?.addEventListener("click",()=>{let p=products.find(p=>p.id===selectedProductId);addToCart(p,currentModifierStep,currentQuantity);});
+            document.getElementById("checkoutNowBtn")?.addEventListener("click",checkoutFlow);document.getElementById("cartCheckoutBtn")?.addEventListener("click",checkoutFlow);
+            document.getElementById("cartIconBtn")?.addEventListener("click",()=>{document.getElementById("cartDrawer").classList.remove("translate-x-full");document.getElementById("drawerOverlay").classList.remove("hidden");});
+            document.getElementById("closeCartBtn")?.addEventListener("click",()=>{document.getElementById("cartDrawer").classList.add("translate-x-full");document.getElementById("drawerOverlay").classList.add("hidden");});
+            document.getElementById("drawerOverlay")?.addEventListener("click",()=>{document.getElementById("cartDrawer").classList.add("translate-x-full");document.getElementById("drawerOverlay").classList.add("hidden");});
+            document.getElementById("favoritesBtn")?.addEventListener("click",()=>showToast(`❤️ ${favorites.size} favorite items`));
+            document.getElementById("ordersHistoryBtn")?.addEventListener("click",openOrdersModal);document.getElementById("closeOrdersModal")?.addEventListener("click",()=>document.getElementById("ordersModal").classList.add("hidden"));
+            document.getElementById("userProfileBtn")?.addEventListener("click",(e)=>{e.stopPropagation();document.getElementById("userDropdown").classList.toggle("hidden");});
+            document.addEventListener("click",(e)=>{if(!document.getElementById("userMenuContainer")?.contains(e.target))document.getElementById("userDropdown")?.classList.add("hidden");});
+            document.getElementById("closeAuthModal")?.addEventListener("click",closeAuthModal);
+            document.getElementById("doLoginBtn")?.addEventListener("click",doLogin);document.getElementById("doSignupBtn")?.addEventListener("click",doSignup);
+            document.getElementById("guestCheckoutBtnFromAuth")?.addEventListener("click",()=>{document.getElementById("authModal").classList.add("hidden");checkoutFlow();});
+            document.getElementById("cancelPaymentBtn")?.addEventListener("click",safeClosePaymentModal);
+            document.getElementById("tenantSwitchBtn")?.addEventListener("click",()=>{let client=document.getElementById("clientTenantView"),merchant=document.getElementById("merchantTenantView");activeTenantSpace=activeTenantSpace==="client"?"merchant":"client";if(activeTenantSpace==="merchant"){client.classList.add("hidden");merchant.classList.remove("hidden");}else{merchant.classList.add("hidden");client.classList.remove("hidden");}});
+            document.getElementById("saasSubLinkBtn")?.addEventListener("click",()=>{let grid=document.getElementById("subscriptionTierTargetGrid");grid.innerHTML=`<div class="bg-white dark:bg-slate-800 p-6 rounded-xl shadow-lg text-center"><i class="fas fa-gem text-3xl text-brand-500 mb-2"></i><h3 class="font-black">Premium Access</h3><p class="text-sm mt-2">SaaS contracts available on request.</p><button class="mt-4 bg-brand-500 px-4 py-2 rounded-xl text-white" id="subDemoBtn">Activate Demo</button></div>`;document.getElementById("subDemoBtn")?.addEventListener("click",()=>{showToast("Subscription demo triggered");document.getElementById("subscriptionModal").classList.add("hidden");});document.getElementById("subscriptionModal").classList.remove("hidden");});
+            document.getElementById("closeSubscriptionModal")?.addEventListener("click",()=>document.getElementById("subscriptionModal").classList.add("hidden"));
+            document.getElementById("themeToggleBtn")?.addEventListener("click",()=>document.documentElement.classList.toggle("dark"));
+            document.getElementById("addNewProductMockBtn")?.addEventListener("click",()=>{showToast("Asset catalog extended (demo)");});
+            document.querySelectorAll(".toggle-pwd").forEach(icon=>{icon.addEventListener("click",(e)=>{let input=e.target.closest(".relative")?.querySelector("input");if(input){input.type=input.type==="password"?"text":"password";e.target.classList.toggle("fa-eye-slash");e.target.classList.toggle("fa-eye");}});});
+            document.getElementById("authLoginTab")?.addEventListener("click",()=>{document.getElementById("authLoginForm").classList.remove("hidden");document.getElementById("authSignupForm").classList.add("hidden");document.getElementById("authLoginTab").className="pb-2 font-black text-brand-600 border-b-2 border-brand-600";document.getElementById("authSignupTab").className="pb-2 font-semibold text-slate-400";});
+            document.getElementById("authSignupTab")?.addEventListener("click",()=>{document.getElementById("authSignupForm").classList.remove("hidden");document.getElementById("authLoginForm").classList.add("hidden");document.getElementById("authSignupTab").className="pb-2 font-black text-brand-600 border-b-2 border-brand-600";document.getElementById("authLoginTab").className="pb-2 font-semibold text-slate-400";});
+            document.getElementById("forgotPasswordBtn")?.addEventListener("click",()=>showToast("Reset link sent (demo)","envelope"));
+        }
+        function init(){initAuth();renderGrid();updateDetailPanel();updateCartUI();bindAllEvents();}
+        init();
     </script>
 </body>
 </html>
